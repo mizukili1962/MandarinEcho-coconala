@@ -154,6 +154,7 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [phrases, setPhrases] = useState<Array<{id: string; zh: string; py: string; ja: string}>>([]);
+  const [trainingPhrases, setTrainingPhrases] = useState<Array<{id: string; zh: string; py: string; ja: string}>>([]);
   const [shuffleQueue, setShuffleQueue] = useState<number[]>([]);
   const [queueIdx, setQueueIdx] = useState(0);
   const [view, setView] = useState('start'); 
@@ -165,12 +166,17 @@ const App = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingPhrase, setEditingPhrase] = useState<{id: string; zh: string; py: string; ja: string} | null>(null);
   const [importText, setImportText] = useState("");
+  const [importMessage, setImportMessage] = useState("");
+  const [importSuccess, setImportSuccess] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalSuccess, setModalSuccess] = useState(false);
 
 
   const [isManualListening, setIsManualListening] = useState(false);
 
   const isAborted = useRef(false);
   const recognitionRef = useRef<any>(null);
+  const importFormRef = useRef<HTMLFormElement>(null);
 
 
   const [randomChengyu, setRandomChengyu] = useState(CHENGYU_LIST[0]);
@@ -203,13 +209,20 @@ const App = () => {
     return onSnapshot(userDocRef, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        if (data.phrases) setPhrases(data.phrases);
+        if (data.phrases) {
+          // 学習中はphrasesを更新しない（表示が消えるのを防止）
+          if (view !== 'learn') {
+            setPhrases(data.phrases);
+          }
+        }
       } else {
-        setPhrases(INITIAL_PHRASES);
-        setDoc(userDocRef, { phrases: INITIAL_PHRASES });
+        if (view !== 'learn') {
+          setPhrases(INITIAL_PHRASES);
+          setDoc(userDocRef, { phrases: INITIAL_PHRASES });
+        }
       }
     }, (err) => console.error(err));
-  }, [user]);
+  }, [user, view]);
 
 
   const saveToCloud = async (newPhrases: Array<{id: string; zh: string; py: string; ja: string}>): Promise<void> => {
@@ -271,7 +284,7 @@ const App = () => {
       if (currentIndex >= currentQueue.length) {
         setStatus("完了");
         await speak("お疲れ様でした", "ja-JP");
-        setTimeout(() => setView('start'), 1200);
+        setTimeout(() => { setView('start'); setTrainingPhrases([]); }, 1200);
       }
       return;
     }
@@ -326,14 +339,14 @@ const App = () => {
     console.log("練習開始ボタン押下 - phrases:", phrases.length);
     
     // phrasesが空の場合、CHENGYU_LISTをデフォルトとして使用
-    const trainingPhrases = phrases.length > 0 ? phrases : CHENGYU_LIST.map((item, idx) => ({
+    const trainingData = phrases.length > 0 ? phrases : CHENGYU_LIST.map((item, idx) => ({
       id: idx.toString(),
       zh: item.zh,
       py: item.py,
       ja: item.ja
     }));
     
-    if (trainingPhrases.length === 0) {
+    if (trainingData.length === 0) {
       console.warn("エラー: フレーズが登録されていません");
       return;
     }
@@ -353,12 +366,12 @@ const App = () => {
       window.speechSynthesis.speak(warmup);
       console.log("ステップ2: 音声合成ウォームアップ完了");
       
-      const q = Array.from({length: trainingPhrases.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+      const q = Array.from({length: trainingData.length}, (_, i) => i).sort(() => Math.random() - 0.5);
       isAborted.current = false;
       
       console.log("ステップ3: UI更新開始");
-      // phrasesを更新（学習画面で表示するため）
-      setPhrases(trainingPhrases);
+      // 学習用フレーズを保存（学習中はこのデータを使用）
+      setTrainingPhrases(trainingData);
       setShuffleQueue(q);
       setQueueIdx(0);
       setView('learn');
@@ -367,7 +380,7 @@ const App = () => {
       console.log("ステップ4: セッション開始予定");
       setTimeout(() => {
         console.log("セッション実行開始");
-        runSession(q, 0, trainingPhrases);
+        runSession(q, 0, trainingData);
       }, 300);
       
     } catch (err) {
@@ -418,13 +431,13 @@ const App = () => {
             )}
 
 
-            {view === 'learn' && shuffleQueue.length > 0 && queueIdx < shuffleQueue.length && phrases.length > 0 && phrases[shuffleQueue[queueIdx]] && (
+            {view === 'learn' && shuffleQueue.length > 0 && queueIdx < shuffleQueue.length && trainingPhrases.length > 0 && trainingPhrases[shuffleQueue[queueIdx]] && (
               <div className="learn-view">
-                <button onClick={() => { isAborted.current = true; setView('start'); window.speechSynthesis.cancel(); if(recognitionRef.current) recognitionRef.current.stop(); }} className="back-btn font-ja"><ChevronLeft size={18}/> 戻る</button>
+                <button onClick={() => { isAborted.current = true; setView('start'); setTrainingPhrases([]); window.speechSynthesis.cancel(); if(recognitionRef.current) recognitionRef.current.stop(); }} className="back-btn font-ja"><ChevronLeft size={18}/> 戻る</button>
                 <div className={`phrase-card ${isHandsFree ? 'handsfree' : 'normal'}`}>
-                   <div className={`phrase-zh font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{phrases[shuffleQueue[queueIdx]].zh}</div>
-                   <div className="phrase-py font-zh">{phrases[shuffleQueue[queueIdx]].py}</div>
-                   <div className="phrase-ja font-ja">{phrases[shuffleQueue[queueIdx]].ja}</div>
+                   <div className={`phrase-zh font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{trainingPhrases[shuffleQueue[queueIdx]].zh}</div>
+                   <div className="phrase-py font-zh">{trainingPhrases[shuffleQueue[queueIdx]].py}</div>
+                   <div className="phrase-ja font-ja">{trainingPhrases[shuffleQueue[queueIdx]].ja}</div>
                 </div>
                 <div className="status-box">
                    <div className="status-label font-ja">{status}</div>
@@ -433,7 +446,7 @@ const App = () => {
                    ) : <Mic size={32} className="opacity-20" />}
                 </div>
                 <div className="button-group">
-                  <button onClick={() => { window.speechSynthesis.cancel(); const ut = new SpeechSynthesisUtterance(phrases[shuffleQueue[queueIdx]].zh); ut.lang = 'zh-CN'; ut.rate = 0.85; window.speechSynthesis.speak(ut); }} className="example-btn font-ja"><Volume2 size={18} /> お手本</button>
+                  <button onClick={() => { window.speechSynthesis.cancel(); const ut = new SpeechSynthesisUtterance(trainingPhrases[shuffleQueue[queueIdx]].zh); ut.lang = 'zh-CN'; ut.rate = 0.85; window.speechSynthesis.speak(ut); }} className="example-btn font-ja"><Volume2 size={18} /> お手本</button>
                   <button onClick={async () => {
                     // 現在の聞き取りを中断
                     if (recognitionRef.current) {
@@ -444,10 +457,10 @@ const App = () => {
                     setStatus("聞き取り中...");
                     
                     // 手動で聞き取りを再開
-                    const recognized = await listenAndAdvance(phrases[shuffleQueue[queueIdx]].zh);
+                    const recognized = await listenAndAdvance(trainingPhrases[shuffleQueue[queueIdx]].zh);
                     if (recognized) {
                       setStatus("認識されました！");
-                      await speak(phrases[shuffleQueue[queueIdx]].ja, 'ja-JP');
+                      await speak(trainingPhrases[shuffleQueue[queueIdx]].ja, 'ja-JP');
                       setStatus("進行中...");
                     }
                     setIsManualListening(false);
@@ -500,19 +513,64 @@ const App = () => {
         <div className="modal-overlay font-ja">
           <form onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
+            
+            // メッセージを即座に表示
+            const isEditing = !!editingPhrase;
+            setModalMessage(isEditing ? '✓ 編集しました' : '✓ 追加しました');
+            setModalSuccess(true);
+            
             const fd = new FormData(e.currentTarget);
-            const newItem = { id: editingPhrase?.id || Date.now().toString(), zh: fd.get('zh') as string, py: fd.get('py') as string, ja: fd.get('ja') as string };
+            const zh = fd.get('zh') as string;
+            const py = fd.get('py') as string;
+            const ja = fd.get('ja') as string;
+            
+            // 重複チェック（編集時は除外）
+            if (!editingPhrase) {
+              const isDuplicate = phrases.some(p => p.zh === zh);
+              if (isDuplicate) {
+                alert(`「${zh}」は既に登録されています`);
+                setModalMessage("");
+                setModalSuccess(false);
+                return;
+              }
+            }
+            
+            const newItem = { id: editingPhrase?.id || Date.now().toString(), zh, py, ja };
             const up = editingPhrase ? phrases.map(p => p.id === editingPhrase.id ? newItem : p) : [...phrases, newItem];
-            setPhrases(up); await saveToCloud(up); setIsModalOpen(false);
-          }} className="modal-content">
+            
+            setPhrases(up);
+            await saveToCloud(up);
+            
+            // 1.5秒後にモーダルを閉じる
+            setTimeout(() => {
+              setIsModalOpen(false);
+              setModalMessage("");
+              setModalSuccess(false);
+            }, 1500);
+          }} className="modal-content relative">
+             <button onClick={() => { setIsModalOpen(false); setModalMessage(""); setModalSuccess(false); }} className="modal-close-btn"><X size={20}/></button>
              <h3 className="modal-header">単語を{editingPhrase ? '編集' : '追加'}</h3>
              <div className="modal-form">
-               <input name="zh" defaultValue={editingPhrase?.zh} placeholder="中国語" required className="form-input font-zh" />
-               <input name="py" defaultValue={editingPhrase?.py} placeholder="ピンイン" className="form-input font-zh" />
-               <input name="ja" defaultValue={editingPhrase?.ja} placeholder="意味" required className="form-input font-ja" />
+               <input name="zh" defaultValue={editingPhrase?.zh} placeholder="中国語" required className="form-input font-zh" disabled={modalMessage !== ""} />
+               <input name="py" defaultValue={editingPhrase?.py} placeholder="ピンイン" className="form-input font-zh" disabled={modalMessage !== ""} />
+               <input name="ja" defaultValue={editingPhrase?.ja} placeholder="意味" required className="form-input font-ja" disabled={modalMessage !== ""} />
+               {modalMessage && (
+                 <div style={{
+                   marginTop: '1rem',
+                   padding: '0.75rem',
+                   borderRadius: '0.5rem',
+                   backgroundColor: modalSuccess ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                   color: modalSuccess ? '#22c55e' : '#ef4444',
+                   textAlign: 'center',
+                   fontSize: '0.875rem',
+                   fontWeight: '700'
+                 }}>
+                   {modalMessage}
+                 </div>
+               )}
                <div className="modal-button-group">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="modal-cancel-btn">戻る</button>
-                <button type="submit" className="modal-submit-btn">保存</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setModalMessage(""); setModalSuccess(false); }} className="modal-cancel-btn">戻る</button>
+                <button type="submit" className="modal-submit-btn" disabled={modalMessage !== ""}>保存</button>
                </div>
              </div>
           </form>
@@ -522,22 +580,77 @@ const App = () => {
 
       {isImportModalOpen && (
         <div className="modal-overlay font-ja">
-          <div className="modal-content relative">
-             <button onClick={() => setIsImportModalOpen(false)} className="modal-close-btn"><X size={20}/></button>
+          <form ref={importFormRef} className="modal-content relative" onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            
+            if (!importText.trim()) {
+              setImportMessage("テキストを入力してください");
+              setImportSuccess(false);
+              return;
+            }
+            
+            const lines = importText.split('\n').filter((l: string) => l.trim());
+            const allItems = lines.map((line: string) => {
+              const pts = line.split(/[,\t\s]+/).map((s: string) => s.trim()).filter((s: string) => s);
+              if (pts.length < 2) return null;
+              const zh = pts[0];
+              const ja = pts[pts.length - 1];
+              const py = pts.length > 2 ? pts.slice(1, -1).join(' ') : '';
+              return { id: Math.random().toString(36).substr(2, 9), zh, py, ja };
+            }).filter((i: any): i is {id: string; zh: string; py: string; ja: string} => i !== null);
+            
+            // 既存の中国語を集める
+            const existingZh = new Set(phrases.map(p => p.zh));
+            
+            // 重複していないアイテムのみフィルタリング
+            const newItems = allItems.filter(item => !existingZh.has(item.zh));
+            const duplicateCount = allItems.length - newItems.length;
+            
+            if (newItems.length === 0 && allItems.length > 0) {
+              setImportMessage(`登録済み: ${duplicateCount}件 (新規登録なし)`);
+              setImportSuccess(false);
+              return;
+            }
+            
+            if (newItems.length > 0) {
+              // 成功メッセージを即座に表示
+              const msg = duplicateCount > 0 
+                ? `✓ ${newItems.length}件登録しました (重複: ${duplicateCount}件)`
+                : `✓ ${newItems.length}件登録しました`;
+              setImportMessage(msg);
+              setImportSuccess(true);
+              setImportText("");
+              
+              // その後、登録処理を実行
+              const up = [...phrases, ...newItems];
+              setPhrases(up);
+              await saveToCloud(up);
+            } else {
+              setImportMessage("有効なデータがありません");
+              setImportSuccess(false);
+            }
+          }}>
+             <button type="button" onClick={() => { importFormRef.current?.reset(); setImportText(""); setIsImportModalOpen(false); setImportMessage(""); setImportSuccess(false); }} className="modal-close-btn"><X size={20}/></button>
              <h3 className="modal-header">一括インポート</h3>
              <div className="modal-form">
                <textarea value={importText} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setImportText(e.target.value)} placeholder="你好 nǐ hǎo こんにちは" className="form-textarea" />
-               <button onClick={async (): Promise<void> => {
-                  const lines = importText.split('\n').filter((l: string) => l.trim());
-                  const newItems = lines.map((line: string) => {
-                    const pts = line.split(/[,\t\s]+/).map((s: string) => s.trim()).filter((s: string) => s);
-                    if (pts.length < 2) return null;
-                    return { id: Math.random().toString(36).substr(2, 9), zh: pts[0], py: pts.length === 3 ? pts[1] : "", ja: pts.length === 3 ? pts[2] : pts[1] };
-                  }).filter((i: any): i is {id: string; zh: string; py: string; ja: string} => i !== null);
-                  if (newItems.length > 0) { const up = [...phrases, ...newItems]; setPhrases(up); await saveToCloud(up); setIsImportModalOpen(false); setImportText(""); }
-               }} className="modal-submit-btn">実行</button>
+               {importMessage && (
+                 <div style={{
+                   marginTop: '1rem',
+                   padding: '1rem',
+                   borderRadius: '0.75rem',
+                   backgroundColor: importSuccess ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                   color: importSuccess ? '#22c55e' : '#ef4444',
+                   textAlign: 'center',
+                   fontSize: '0.875rem',
+                   fontWeight: '700'
+                 }}>
+                   {importMessage}
+                 </div>
+               )}
+               <button type="submit" className="modal-submit-btn">実行</button>
              </div>
-          </div>
+          </form>
         </div>
       )}
     </div>
