@@ -316,7 +316,6 @@ const App = () => {
       } else {
         // 最大再試行回数に達したためスキップ
         setStatus("スキップ");
-        setLastResult("（聞き取り失敗のためスキップしました）");
         setTimeout(() => runSession(currentQueue, currentIndex + 1, trainingData, 0), 1500);
       }
     }
@@ -419,7 +418,7 @@ const App = () => {
             )}
 
 
-            {view === 'learn' && phrases[shuffleQueue[queueIdx]] && (
+            {view === 'learn' && shuffleQueue.length > 0 && queueIdx < shuffleQueue.length && phrases.length > 0 && phrases[shuffleQueue[queueIdx]] && (
               <div className="learn-view">
                 <button onClick={() => { isAborted.current = true; setView('start'); window.speechSynthesis.cancel(); if(recognitionRef.current) recognitionRef.current.stop(); }} className="back-btn font-ja"><ChevronLeft size={18}/> 戻る</button>
                 <div className={`phrase-card ${isHandsFree ? 'handsfree' : 'normal'}`}>

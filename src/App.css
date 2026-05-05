@@ -300,16 +300,22 @@ input::placeholder {
 
 .phrase-zh {
   /* フレーズの中国語テキスト (大きく表示) */
-  font-size: 3.75rem;
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: 700;
   margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .phrase-py {
   /* フレーズのピンイン */
-  font-size: 1.25rem;
+  font-size: clamp(0.875rem, 3vw, 1.25rem);
   opacity: 0.8;
   margin-bottom: 0.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.6;
+  max-width: 100%;
 }
 
 .phrase-ja {
