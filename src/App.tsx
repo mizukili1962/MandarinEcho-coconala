@@ -291,7 +291,6 @@ const App = () => {
       return;
     }
 
-
     setQueueIdx(currentIndex);
     const phraseIdx = currentQueue[currentIndex];
     const phrase = data[phraseIdx];
@@ -634,7 +633,7 @@ const App = () => {
             
             const lines = importText.split('\n').filter((l: string) => l.trim());
             const allItems = lines.map((line: string) => {
-              const pts = line.split(/[,\t\s]+/).map((s: string) => s.trim()).filter((s: string) => s);
+              const pts = line.split(/[,\t\s\u3000]+/).map((s: string) => s.trim()).filter((s: string) => s);
               if (pts.length < 2) return null;
               const zh = pts[0];
               const ja = pts[pts.length - 1];
