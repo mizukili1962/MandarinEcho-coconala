@@ -5,6 +5,8 @@ import {
   signInAnonymously, 
   onAuthStateChanged, 
   signOut, 
+  GoogleAuthProvider,
+  signInWithPopup,
   type User
 } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -399,6 +401,38 @@ const App = () => {
   return (
     <div className={`app-container ${isHandsFree ? 'handsfree' : 'normal'}`}>
 
+      {!user && (
+        <div className="login-container">
+          <div className="login-content">
+            <div className="login-header font-ja">
+              <h1>Mandarin Echo</h1>
+            </div>
+            
+            <div className="login-buttons">
+              <button
+                onClick={async () => {
+                  try {
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(auth, provider);
+                  } catch (error) {
+                    console.error('ログインエラー:', error);
+                  }
+                }}
+                className="login-btn google-login-btn font-ja"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <path d="M12 1v6m0 6v6"></path>
+                  <path d="M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24"></path>
+                  <path d="M1 12h6m6 0h6"></path>
+                  <path d="M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
+                </svg>
+                Googleでログイン
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {user && (
         <>
@@ -407,7 +441,16 @@ const App = () => {
               <Volume2 size={20} className={isHandsFree ? 'text-[#ffd700]' : 'text-white'} />
               <h1 className={`font-ja ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>Mandarin Echo</h1>
             </div>
-            <button onClick={() => signOut(auth)} className="text-white"><LogOut size={20} /></button>
+            <div className="app-header-user">
+              {user && (
+                <>
+                  <div className="user-info font-ja">
+                    <div className="user-name">{user.displayName || user.email || 'ゲスト'}</div>
+                  </div>
+                  <button onClick={() => signOut(auth)} className="text-white"><LogOut size={20} /></button>
+                </>
+              )}
+            </div>
           </header>
 
 
