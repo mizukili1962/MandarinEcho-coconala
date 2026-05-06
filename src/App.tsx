@@ -141,6 +141,23 @@ const CHENGYU_LIST = [
   { zh: "众志成城", py: "zhòng zhì chéng chéng", ja: "団結すれば何事も成し遂げられること" }
 ];
 
+// 表示用の成語リスト
+const DISPLAY_CHENGYU_LIST = [
+  { zh: "温故知新", py: "wēn gù zhī xīn", ja: "昔の事を研究して、新しい知識を得ること" },
+  { zh: "一心一意", py: "yī xīn yī yì", ja: "一つのことに心を集中させること" },
+  { zh: "自由自在", py: "zì yóu zì zài", ja: "思う通りに振る舞うこと" },
+  { zh: "日新月异", py: "rì xīn yuè yì", ja: "絶えず進歩し、変化すること" },
+  { zh: "入木三分", py: "rù mù sān fēn", ja: "見識や描写が非常に鋭く深いこと" },
+  { zh: "一石二鸟", py: "yī shí èr niǎo", ja: "一石二鳥、一つの行動で二つの利益を得ること" },
+  { zh: "破釜沉舟", py: "pò fǔ chén zhōu", ja: "決死の覚悟で事に当たること" },
+  { zh: "前程似锦", py: "qián chéng sì jǐn", ja: "前途が輝かしく希望に満ちていること" },
+  { zh: "走马观花", py: "zǒu mǎ guān huā", ja: "物事を表面だけ見て深く理解しないこと" },
+  { zh: "纸上谈兵", py: "zhǐ shàng tán bīng", ja: "机上の空論、実行の伴わない議論" },
+  { zh: "顺其自然", py: "shùn qí zì rán", ja: "あるがまま、自然の流れに任せること" },
+  { zh: "万无一失", py: "wàn wú yī shī", ja: "絶対に間違いがない、万全であること" },
+  { zh: "废寝忘食", py: "fèi qǐn wàng shí", ja: "寝食を忘れて没頭すること" },
+];
+
 
 const INITIAL_PHRASES = [
   { id: '1', zh: "日本", py: "rì běn", ja: "日本" },
@@ -148,7 +165,7 @@ const INITIAL_PHRASES = [
   { id: '3', zh: "谢谢", py: "xiexie", ja: "ありがとう", focus: "舌面音x" },
   { id: '4', zh: "早上好", py: "zaoshanghao", ja: "おはよう", focus: "そり舌音sh" },
   { id: '5', zh: "喝水", py: "heshui", ja: "水を飲む", focus: "喉の奥のe" },
-  { id: '6', zh: "你是", py: "nishi", ja: "あなたは〜です", focus: "nとsh" }
+  { id: '6', zh: "你是", py: "nishi", ja: "あなたは〜です", focus: "nとsh" },
 ];
 
 
@@ -181,13 +198,13 @@ const App = () => {
   const importFormRef = useRef<HTMLFormElement>(null);
 
 
-  const [randomChengyu, setRandomChengyu] = useState(CHENGYU_LIST[0]);
+  const [randomChengyu, setRandomChengyu] = useState(DISPLAY_CHENGYU_LIST[0]);
 
 
   useEffect(() => {
     if (view === 'start') {
-      const idx = Math.floor(Math.random() * CHENGYU_LIST.length);
-      setRandomChengyu(CHENGYU_LIST[idx]);
+      const idx = Math.floor(Math.random() * DISPLAY_CHENGYU_LIST.length);
+      setRandomChengyu(DISPLAY_CHENGYU_LIST[idx]);
     }
   }, [view]);
 
