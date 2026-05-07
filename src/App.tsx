@@ -166,6 +166,15 @@ const INITIAL_PHRASES = [
   { id: '4', zh: "早上好", py: "zaoshanghao", ja: "おはよう", focus: "そり舌音sh" },
   { id: '5', zh: "喝水", py: "heshui", ja: "水を飲む", focus: "喉の奥のe" },
   { id: '6', zh: "你是", py: "nishi", ja: "あなたは〜です", focus: "nとsh" },
+  { id: '7', zh: "我爱你", py: "woaini", ja: "愛してる", focus: "rとi" },
+  { id: '8', zh: "中国", py: "zhongguo", ja: "中国", focus: "舌尖音zh" },
+  { id: '9', zh: "吃饭", py: "chifan", ja: "ご飯を食べる", focus: "舌尖音ch" },
+  { id: '10', zh: "睡觉", py: "shuijiao", ja: "寝る", focus: "舌尖音sh" },
+  { id: '11', zh: "喜欢", py: "xihuan", ja: "好き", focus: "そり舌音x" },
+  { id: '12', zh: "学习", py: "xuexi", ja: "勉強する", focus: "そり舌音x" },
+  { id: '13', zh: "工作", py: "gongzuo", ja: "仕事", focus: "喉の奥のo" },
+  { id: '14', zh: "朋友", py: "pengyou", ja: "友達", focus: "喉の奥のo" },
+  { id: '15', zh: "学习中文", py: "xuexi zhongwen", ja: "中国語を勉強する", focus: "そり舌音x" }
 ];
 
 
@@ -180,7 +189,6 @@ const App = () => {
   const [isHandsFree, setIsHandsFree] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("待機中");
-  const [lastResult, setLastResult] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingPhrase, setEditingPhrase] = useState<{id: string; zh: string; py: string; ja: string} | null>(null);
@@ -256,15 +264,40 @@ const App = () => {
   const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
     return new Promise((resolve: (value: void) => void) => {
       if (isAborted.current) return resolve();
+      
+      // すべての音声合成をキャンセルし、キューをクリア
       window.speechSynthesis.cancel();
-      const ut = new SpeechSynthesisUtterance(text);
-      ut.lang = lang;
-      ut.rate = lang === 'ja-JP' ? 1.4 : 0.85;
-      ut.pitch = 1.0;
-      ut.volume = 1.0;
-      ut.onend = () => resolve();
-      ut.onerror = () => resolve();
-      window.speechSynthesis.speak(ut);
+      
+      // タイムアウト設定（最大3秒）
+      const timeoutId = setTimeout(() => {
+        console.warn(`[音声合成] タイムアウト: "${text}"`);
+        resolve();
+      }, 3000);
+      
+      // キャンセル後、キューが完全にクリアされるまで少し待機
+      setTimeout(() => {
+        if (isAborted.current) return;
+        
+        const ut = new SpeechSynthesisUtterance(text);
+        ut.lang = lang;
+        ut.rate = lang === 'ja-JP' ? 1.4 : 0.85;
+        ut.pitch = 1.0;
+        ut.volume = 1.0;
+        
+        ut.onend = () => {
+          clearTimeout(timeoutId);
+          console.log(`[音声合成] 完了: "${text}"`);
+          resolve();
+        };
+        
+        ut.onerror = (e) => {
+          clearTimeout(timeoutId);
+          console.error(`[音声合成] エラー: ${e.error}`);
+          resolve();
+        };
+        
+        window.speechSynthesis.speak(ut);
+      }, 50);
     });
   };
 
@@ -273,24 +306,137 @@ const App = () => {
     return new Promise((resolve: (value: boolean) => void) => {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       if (!SpeechRecognition) return resolve(false);
+      
       const rec = new (SpeechRecognition as any)();
       recognitionRef.current = rec;
       rec.lang = 'zh-CN';
-      rec.onstart = (): void => setIsListening(true);
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.maxAlternatives = 3;
+      
+      let timeoutId: any = null;
+      const MAX_LISTEN_TIME = 6000; // 5秒のタイムアウト
+      const IGNORE_FIRST_RESULTS_MS = 2000; // 最初の2秒の結果を無視（お手本完全終了を確保）
+      let recognitionStartTime = 0;
+      let hasReceivedValidResult = false; // 有効な結果を受け取ったかどうか
+      let hasResolved = false; // 既に結果を返したかどうかのフラグ
+      
+      const resolveOnce = (result: boolean) => {
+        if (hasResolved) return;
+        hasResolved = true;
+        clearTimeout(timeoutId);
+        setIsListening(false);
+        resolve(result);
+      };
+      
+      // 認識開始時にタイムアウトを設定
+      rec.onstart = (): void => {
+        recognitionStartTime = Date.now();
+        setIsListening(true);
+        timeoutId = setTimeout(() => {
+          resolveOnce(false);
+          rec.stop();
+        }, MAX_LISTEN_TIME);
+      };
+      
       rec.onresult = (e: any): void => {
-        const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('');
-        setLastResult(transcript);
-        if (transcript.includes(targetZh)) { 
-          rec.onend = null; 
-          rec.stop(); 
-          setIsListening(false);
-          resolve(true); 
+        if (hasResolved) return; // 既に結果を返していたら処理しない
+        
+        let interimTranscript = '';
+        let finalTranscript = '';
+        
+        // 最初の2秒の結果を無視
+        const elapsedTime = Date.now() - recognitionStartTime;
+        if (elapsedTime < IGNORE_FIRST_RESULTS_MS) {
+          console.log(`[音声認識] 無視中: ${elapsedTime}ms - 最初の${IGNORE_FIRST_RESULTS_MS}msは無視します`);
+          return;
+        }
+        
+        hasReceivedValidResult = true;
+        
+        // すべての結果を処理
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const transcript = e.results[i][0].transcript.trim();
+          
+          if (e.results[i].isFinal) {
+            // 最終結果を使用
+            finalTranscript += transcript + ' ';
+          } else {
+            // 中間結果
+            interimTranscript += transcript;
+          }
+        }
+        
+        // 最終結果をチェック
+        if (finalTranscript) {
+          const results = finalTranscript.trim().split(/\s+/);
+          for (const result of results) {
+            console.log(`[音声認識] 認識結果: "${result}" 対象: "${targetZh}"`);
+            
+            // 空文字を除外して、完全一致、または部分一致をチェック
+            if (result && (result === targetZh || result.includes(targetZh) || targetZh.includes(result))) {
+              console.log(`[音声認識] 完全一致: "${result}"`);
+              resolveOnce(true);
+              rec.stop();
+              return;
+            }
+            
+            // 類似度チェック（編集距離を使用した簡易実装）
+            const similarity = calculateSimilarity(result, targetZh);
+            if (similarity > 0.65) {
+              console.log(`[音声認識] 類似度一致: "${result}" (${(similarity * 100).toFixed(1)}%)`);
+              resolveOnce(true);
+              rec.stop();
+              return;
+            }
+          }
         }
       };
-      rec.onerror = (): void => resolve(false);
-      rec.onend = (): void => { setIsListening(false); resolve(false); };
+      
+      rec.onerror = (e: any): void => {
+        console.error('[音声認識] エラー:', e.error);
+        resolveOnce(false);
+      };
+      
+      rec.onend = (): void => {
+        console.log(`[音声認識] 終了 (有効な結果受取: ${hasReceivedValidResult})`);
+        resolveOnce(false);
+      };
+      
       rec.start();
     });
+  };
+
+  // 文字列の類似度を計算（Levenshtein距離を使用）
+  const calculateSimilarity = (str1: string, str2: string): number => {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix: number[][] = [];
+    
+    for (let i = 0; i <= len2; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= len1; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= len2; i++) {
+      for (let j = 1; j <= len1; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    
+    const distance = matrix[len2][len1];
+    const maxLen = Math.max(len1, len2);
+    return 1 - (distance / maxLen);
   };
 
 
@@ -321,13 +467,17 @@ const App = () => {
 
     // 再試行の表示
     if (retryCount > 0) {
-      setLastResult("");
       setStatus(`再試行... (${retryCount}/${MAX_RETRIES})`);
       await new Promise(r => setTimeout(r, 400));
     }
 
     setStatus("お手本...");
     await speak(phrase.zh, 'zh-CN');
+    
+    if (isAborted.current) return;
+    
+    // お手本の余韻を完全に避けるため、2秒待機
+    await new Promise(r => setTimeout(r, 2000));
     
     if (isAborted.current) return;
     
@@ -379,9 +529,14 @@ const App = () => {
       // 2. 音声合成エンジンのウォームアップ（重要: これで最初の読み上げの途切れを防ぐ）
       console.log("ステップ2: 音声合成ウォームアップ開始");
       window.speechSynthesis.cancel();
-      const warmup = new SpeechSynthesisUtterance("");
-      warmup.volume = 0;
-      window.speechSynthesis.speak(warmup);
+      
+      // シンプルなウォームアップ（タイムアウト付き）
+      await Promise.race([
+        speak("準備中", "ja-JP"),
+        new Promise(r => setTimeout(r, 1500))
+      ]);
+      window.speechSynthesis.cancel();
+      
       console.log("ステップ2: 音声合成ウォームアップ完了");
       
       const q = Array.from({length: trainingData.length}, (_, i) => i).sort(() => Math.random() - 0.5);
@@ -399,7 +554,7 @@ const App = () => {
       setTimeout(() => {
         console.log("セッション実行開始");
         runSession(q, 0, trainingData);
-      }, 300);
+      }, 800);
       
     } catch (err) {
       console.error("エラー発生:", err);
@@ -501,7 +656,7 @@ const App = () => {
                 <div className="status-box">
                    <div className="status-label font-ja">{status}</div>
                    {isListening ? (
-                     <div className={`status-text listening font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{lastResult || "..."}</div>
+                     <Volume2 size={32} className={`animate-pulse ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`} />
                    ) : <Mic size={32} className="opacity-20" />}
                 </div>
                 <div className="button-group">
@@ -511,7 +666,6 @@ const App = () => {
                     if (recognitionRef.current) {
                       recognitionRef.current.abort();
                     }
-                    setLastResult("");
                     setIsManualListening(true);
                     setStatus("聞き取り中...");
                     

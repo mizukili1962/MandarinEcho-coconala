@@ -24,18 +24,17 @@
    - メールアドレスログイン
    - Googleアカウントログイン
 
-## 既知の不具合と対応方針
-
-### 音声認識
-- **問題**: 数個目の単語から音声認識が反応しなくなる
-- **対応**: マイクのリセット処理またはセッション管理を確認
+## 残タスク
+- 学習データの保存方法を決定
+- Github Actionsを使用したCI/CDパイプラインの構築
+　developにマージされたら自動でFirebaseにデプロイする設定を追加
 
 ## 認証セキュリティ要件
 
 ### Firebase設定
 - **環境変数管理**: すべてのFirebase認証情報（API キー、プロジェクトID等）は `.env.local` に配置
   - `.env.local` は `.gitignore` に追加し、Gitリポジトリにコミットしない
-  - 本番環境では Vercel / Firebase Hosting のシークレット管理機能を使用
+  - 本番環境では Firebase Hosting のシークレット管理機能を使用
 - **リダイレクトURI検証**: Google Cloud Consoleで認可済みのリダイレクトURIを明示的に登録
   - 開発環境: `http://localhost:5173`, `http://localhost:3000`
   - 本番環境: 実際のデプロイドメインのみ許可
