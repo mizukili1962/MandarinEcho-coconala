@@ -315,8 +315,8 @@ const App = () => {
       rec.maxAlternatives = 3;
       
       let timeoutId: any = null;
-      const MAX_LISTEN_TIME = 6000; // 5秒のタイムアウト
-      const IGNORE_FIRST_RESULTS_MS = 2000; // 最初の2秒の結果を無視（お手本完全終了を確保）
+      const MAX_LISTEN_TIME = 7000; // 7秒のタイムアウト
+      const IGNORE_FIRST_RESULTS_MS = 1000; // 最初の1秒の結果を無視（お手本完全終了を確保）
       let recognitionStartTime = 0;
       let hasReceivedValidResult = false; // 有効な結果を受け取ったかどうか
       let hasResolved = false; // 既に結果を返したかどうかのフラグ
@@ -476,8 +476,8 @@ const App = () => {
     
     if (isAborted.current) return;
     
-    // お手本の余韻を完全に避けるため、2秒待機
-    await new Promise(r => setTimeout(r, 2000));
+    // お手本の余韻を完全に避けるため、1.5秒待機
+    await new Promise(r => setTimeout(r, 1000));
     
     if (isAborted.current) return;
     
