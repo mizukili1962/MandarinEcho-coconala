@@ -9,7 +9,7 @@ import {
   signInWithPopup,
   type User
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, onSnapshot, writeBatch, collection, getDocs, query } from 'firebase/firestore';
 import { 
   Mic, LogOut, ChevronLeft, 
   Plus, Trash2, Edit2,
@@ -31,7 +31,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = 'fluency-trainer-v5';
 
 
 // --- UI Components (Ornate Icons) ---
@@ -105,77 +104,7 @@ const OrnateChrysanthemum = ({ size = 24, className = "" }) => (
 );
 
 
-// --- 成語データベース ---
-const CHENGYU_LIST = [
-  { zh: "温故知新", py: "wēn gù zhī xīn", ja: "昔の事を研究して、新しい知識を得ること" },
-  { zh: "一心一意", py: "yī xīn yī yì", ja: "一つのことに心を集中させること" },
-  { zh: "自由自在", py: "zì yóu zì zài", ja: "思う通りに振る舞うこと" },
-  { zh: "日新月异", py: "rì xīn yuè yì", ja: "絶えず進歩し、変化すること" },
-  { zh: "入木三分", py: "rù mù sān fēn", ja: "見識や描写が非常に鋭く深いこと" },
-  { zh: "半途而废", py: "bàn tú ér fèi", ja: "物事を途中で投げ出すこと" },
-  { zh: "不可思议", py: "bù kě sī yì", ja: "想像もできないほど不思議なこと" },
-  { zh: "自强不息", py: "zì qiáng bù xī", ja: "自ら進んで努力し、怠らないこと" },
-  { zh: "胸有成竹", py: "xiōng yǒu chéng zhú", ja: "成算がすでにあること" },
-  { zh: "大同小异", py: "dà tóng xiǎo yì", ja: "だいたい同じで、少し違うだけのこと" },
-  { zh: "一见钟情", py: "yī jiàn zhōng qíng", ja: "一目惚れすること" },
-  { zh: "名副其实", py: "míng fù qí shí", ja: "名実ともに備わっていること" },
-  { zh: "坚持不懈", py: "jiān chí bù xiè", ja: "最後までたゆまずやり抜くこと" },
-  { zh: "守口如瓶", py: "shǒu kǒu rú píng", ja: "口が非常に堅いこと" },
-  { zh: "心曠神怡", py: "xīn kuàng shén yí", ja: "心が広々として気持ちが良いこと" },
-  { zh: "精益求精", py: "jīng yì qiú jīng", ja: "良いものをさらに良くしようとすること" },
-  { zh: "井底之蛙", py: "jǐng dǐ zhī wā", ja: "井の中の蛙、見識の狭いこと" },
-  { zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計な付け足しをすること" },
-  { zh: "塞翁失马", py: "sài wēng shī mǎ", ja: "人生の幸福や不幸は予測できないこと" },
-  { zh: "青出于蓝", py: "qīng chū yú lán", ja: "弟子が師匠よりも優れていること" },
-  { zh: "落花流水", py: "luò huā liú shuǐ", ja: "無残に打ち負かされること" },
-  { zh: "一石二鸟", py: "yī shí èr niǎo", ja: "一石二鳥、一つの行動で二つの利益を得ること" },
-  { zh: "破釜沉舟", py: "pò fǔ chén zhōu", ja: "決死の覚悟で事に当たること" },
-  { zh: "前程似锦", py: "qián chéng sì jǐn", ja: "前途が輝かしく希望に満ちていること" },
-  { zh: "走马观花", py: "zǒu mǎ guān huā", ja: "物事を表面だけ見て深く理解しないこと" },
-  { zh: "纸上谈兵", py: "zhǐ shàng tán bīng", ja: "机上の空論、実行の伴わない議論" },
-  { zh: "顺其自然", py: "shùn qí zì rán", ja: "あるがまま、自然の流れに任せること" },
-  { zh: "万无一失", py: "wàn wú yī shī", ja: "絶対に間違いがない、万全であること" },
-  { zh: "废寝忘食", py: "fèi qǐn wàng shí", ja: "寝食を忘れて没頭すること" },
-  { zh: "望尘莫及", py: "wàng chén mò jí", ja: "はるかに及ばないこと" },
-  { zh: "全力以赴", py: "quán lì yǐ fù", ja: "全力を尽くして取り組むこと" },
-  { zh: "众志成城", py: "zhòng zhì chéng chéng", ja: "団結すれば何事も成し遂げられること" }
-];
-
-// 表示用の成語リスト
-const DISPLAY_CHENGYU_LIST = [
-  { zh: "温故知新", py: "wēn gù zhī xīn", ja: "昔の事を研究して、新しい知識を得ること" },
-  { zh: "一心一意", py: "yī xīn yī yì", ja: "一つのことに心を集中させること" },
-  { zh: "自由自在", py: "zì yóu zì zài", ja: "思う通りに振る舞うこと" },
-  { zh: "日新月异", py: "rì xīn yuè yì", ja: "絶えず進歩し、変化すること" },
-  { zh: "入木三分", py: "rù mù sān fēn", ja: "見識や描写が非常に鋭く深いこと" },
-  { zh: "一石二鸟", py: "yī shí èr niǎo", ja: "一石二鳥、一つの行動で二つの利益を得ること" },
-  { zh: "破釜沉舟", py: "pò fǔ chén zhōu", ja: "決死の覚悟で事に当たること" },
-  { zh: "前程似锦", py: "qián chéng sì jǐn", ja: "前途が輝かしく希望に満ちていること" },
-  { zh: "走马观花", py: "zǒu mǎ guān huā", ja: "物事を表面だけ見て深く理解しないこと" },
-  { zh: "纸上谈兵", py: "zhǐ shàng tán bīng", ja: "机上の空論、実行の伴わない議論" },
-  { zh: "顺其自然", py: "shùn qí zì rán", ja: "あるがまま、自然の流れに任せること" },
-  { zh: "万无一失", py: "wàn wú yī shī", ja: "絶対に間違いがない、万全であること" },
-  { zh: "废寝忘食", py: "fèi qǐn wàng shí", ja: "寝食を忘れて没頭すること" },
-];
-
-
-const INITIAL_PHRASES = [
-  { id: '1', zh: "日本", py: "rì běn", ja: "日本" },
-  { id: '2', zh: "谢谢", py: "xiè xie", ja: "ありがとう" },
-  { id: '3', zh: "谢谢", py: "xiexie", ja: "ありがとう", focus: "舌面音x" },
-  { id: '4', zh: "早上好", py: "zaoshanghao", ja: "おはよう", focus: "そり舌音sh" },
-  { id: '5', zh: "喝水", py: "heshui", ja: "水を飲む", focus: "喉の奥のe" },
-  { id: '6', zh: "你是", py: "nishi", ja: "あなたは〜です", focus: "nとsh" },
-  { id: '7', zh: "我爱你", py: "woaini", ja: "愛してる", focus: "rとi" },
-  { id: '8', zh: "中国", py: "zhongguo", ja: "中国", focus: "舌尖音zh" },
-  { id: '9', zh: "吃饭", py: "chifan", ja: "ご飯を食べる", focus: "舌尖音ch" },
-  { id: '10', zh: "睡觉", py: "shuijiao", ja: "寝る", focus: "舌尖音sh" },
-  { id: '11', zh: "喜欢", py: "xihuan", ja: "好き", focus: "そり舌音x" },
-  { id: '12', zh: "学习", py: "xuexi", ja: "勉強する", focus: "そり舌音x" },
-  { id: '13', zh: "工作", py: "gongzuo", ja: "仕事", focus: "喉の奥のo" },
-  { id: '14', zh: "朋友", py: "pengyou", ja: "友達", focus: "喉の奥のo" },
-  { id: '15', zh: "学习中文", py: "xuexi zhongwen", ja: "中国語を勉強する", focus: "そり舌音x" }
-];
+// Firestore から動的に取得するため、ハードコードされたデータは削除
 
 
 const App = () => {
@@ -206,22 +135,52 @@ const App = () => {
   const importFormRef = useRef<HTMLFormElement>(null);
 
 
-  const [randomChengyu, setRandomChengyu] = useState(DISPLAY_CHENGYU_LIST[0]);
+  const [randomChengyu, setRandomChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
+  const [allChengyuList, setAllChengyuList] = useState<Array<{zh: string; py: string; ja: string}>>([]);
 
 
   useEffect(() => {
-    if (view === 'start') {
-      const idx = Math.floor(Math.random() * DISPLAY_CHENGYU_LIST.length);
-      setRandomChengyu(DISPLAY_CHENGYU_LIST[idx]);
+    if (view === 'start' && allChengyuList.length > 0) {
+      const idx = Math.floor(Math.random() * allChengyuList.length);
+      setRandomChengyu(allChengyuList[idx]);
     }
-  }, [view]);
+  }, [view, allChengyuList]);
+
+  // Firestore から成語リストを取得
+  useEffect(() => {
+    const fetchChengyuList = async () => {
+      try {
+        const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
+        const list = chengyuSnap.docs.map(doc => ({
+          zh: doc.data().chinese,
+          py: doc.data().pinyin,
+          ja: doc.data().japanese
+        }));
+        setAllChengyuList(list);
+        if (list.length > 0) {
+          setRandomChengyu(list[0]);
+        }
+      } catch (error) {
+        console.error('[Firestore] 成語リスト取得エラー:', error);
+      }
+    };
+    fetchChengyuList();
+  }, []);
 
 
   useEffect(() => {
     const initAuth = async () => {
       try { await signInAnonymously(auth); } catch (e) {}
-      const unsubscribe = onAuthStateChanged(auth, (u: User | null) => {
+      
+      // マスターデータを初期化
+      await initializeMasterData();
+      
+      const unsubscribe = onAuthStateChanged(auth, async (u: User | null) => {
         setUser(u);
+        if (u) {
+          // ユーザー初期化：新規ユーザーの場合のみデータを登録
+          await initializeUserData(u.uid, u.email || '', u.displayName || 'ゲスト');
+        }
         setLoading(false);
       });
       return unsubscribe;
@@ -232,34 +191,194 @@ const App = () => {
 
   useEffect(() => {
     if (!user) return;
-    const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'data');
-    return onSnapshot(userDocRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.phrases) {
-          // 学習中はphrasesを更新しない（表示が消えるのを防止）
-          if (view !== 'learn') {
-            setPhrases(data.phrases);
-          }
-        }
-      } else {
-        if (view !== 'learn') {
-          setPhrases(INITIAL_PHRASES);
-          setDoc(userDocRef, { phrases: INITIAL_PHRASES });
+    
+    // Firestore からリアルタイムでフレーズを同期
+    const phrasesCollectionRef = collection(db, 'users', user.uid, 'phrases');
+    const unsubscribe = onSnapshot(phrasesCollectionRef, (snap) => {
+      if (view !== 'learn') {
+        const loadedPhrases = snap.docs.map(doc => ({
+          id: doc.id,
+          zh: doc.data().chinese || '',
+          py: doc.data().pinyin || '',
+          ja: doc.data().japanese || ''
+        }));
+        
+        // Firestore からのデータを使用
+        if (loadedPhrases.length > 0) {
+          setPhrases(loadedPhrases);
         }
       }
-    }, (err) => console.error(err));
+    }, (err) => console.error('[Firestore] リスナーエラー:', err));
+    
+    return unsubscribe;
   }, [user, view]);
 
 
   const saveToCloud = async (newPhrases: Array<{id: string; zh: string; py: string; ja: string}>): Promise<void> => {
     if (!user) return;
     try {
-      const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'data');
-      await setDoc(userDocRef, { phrases: newPhrases }, { merge: true });
-    } catch (error) {}
+      const batch = writeBatch(db);
+      
+      // 既存のフレーズをすべて削除
+      const existingSnap = await getDocs(collection(db, 'users', user.uid, 'phrases'));
+      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
+      
+      // 新しいフレーズを登録
+      newPhrases.forEach((phrase) => {
+        batch.set(doc(db, 'users', user.uid, 'phrases', phrase.id), {
+          chinese: phrase.zh,
+          pinyin: phrase.py,
+          japanese: phrase.ja,
+          isLearned: false,
+          attempts: 0,
+          lastAttemptAt: null,
+          createdAt: new Date()
+        });
+      });
+      
+      await batch.commit();
+      console.log(`[Firestore] ${newPhrases.length} 件のフレーズを保存しました`);
+    } catch (error) {
+      console.error('[Firestore] 保存エラー:', error);
+    }
   };
 
+
+  // マスターデータの初期化（既にFirestoreに登録済み）
+  const initializeMasterData = async (): Promise<void> => {
+    try {
+      const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
+      if (!chengyuSnap.empty) {
+        console.log(`[Firestore] マスターデータ確認済み (成語: ${chengyuSnap.docs.length}件)`);
+      } else {
+        console.warn('[Firestore] マスターデータが見つかりません。Firebase Consoleから登録してください。');
+      }
+    } catch (error) {
+      console.error('[Firestore] マスターデータ確認エラー:', error);
+    }
+  };
+
+  // ユーザー初期化：新規ユーザーの場合、Firestore に必要なデータを作成
+  const initializeUserData = async (uid: string, email: string, displayName: string): Promise<void> => {
+    try {
+      const userDocRef = doc(db, 'users', uid);
+      
+      // ユーザードキュメント作成（merge: true で既存データを保護）
+      await setDoc(userDocRef, {
+        email: email,
+        displayName: displayName,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, { merge: true });
+      
+      // サブコレクション存在チェック：phrasesが存在するかで初期化済み判定
+      const phrasesSnap = await getDocs(collection(db, 'users', uid, 'phrases'));
+      
+      if (phrasesSnap.empty) {
+        // 初期化が必要
+        console.log(`[Firestore] ユーザー ${uid} のマスターデータコピーを開始します`);
+        const batch = writeBatch(db);
+        
+        // マスターデータから成語をコピー
+        const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
+        if (!chengyuSnap.empty) {
+          chengyuSnap.docs.forEach((masterDoc) => {
+            batch.set(doc(db, 'users', uid, 'chengyu', masterDoc.id), {
+              chinese: masterDoc.data().chinese,
+              pinyin: masterDoc.data().pinyin,
+              japanese: masterDoc.data().japanese,
+              isLearned: false,
+              attempts: 0,
+              lastAttemptAt: null,
+              createdAt: new Date()
+            });
+          });
+          console.log(`[Firestore] マスター成語 ${chengyuSnap.docs.length} 件をコピーしました`);
+        }
+        
+        // マスターデータからフレーズをコピー
+        const phrasesSnapMaster = await getDocs(collection(db, 'masterData', 'phrases', 'list'));
+        let phraseCount = 0;
+        if (!phrasesSnapMaster.empty) {
+          phrasesSnapMaster.docs.forEach((masterDoc) => {
+            batch.set(doc(db, 'users', uid, 'phrases', masterDoc.id), {
+              chinese: masterDoc.data().chinese,
+              pinyin: masterDoc.data().pinyin,
+              japanese: masterDoc.data().japanese,
+              isLearned: false,
+              attempts: 0,
+              lastAttemptAt: null,
+              createdAt: new Date()
+            });
+            phraseCount++;
+          });
+          console.log(`[Firestore] マスターフレーズ ${phrasesSnapMaster.docs.length} 件をコピーしました`);
+        }
+        
+        // 学習進捗を初期化
+        batch.set(doc(db, 'learningProgress', uid), {
+          totalWords: phraseCount,
+          learnedWords: 0,
+          todayProgress: 0,
+          lastSessionAt: null,
+          streak: 0,
+          chengyuLearned: 0,
+          phrasesLearned: 0,
+          updatedAt: new Date()
+        });
+        
+        await batch.commit();
+        console.log(`[Firestore] ユーザー ${uid} を初期化しました`);
+      } else {
+        console.log(`[Firestore] ユーザー ${uid} は既に初期化済みです`);
+      }
+    } catch (error) {
+      console.error('[Firestore] ユーザー初期化エラー:', error);
+    }
+  };
+
+  // フレーズデータを Firestore から読み込み（onSnapshot で自動同期されるため不要）
+  // 削除して、useEffect の onSnapshot で対応
+
+  // 学習進捗を記録
+  const recordLearningProgress = async (phraseId: string, success: boolean): Promise<void> => {
+    if (!user) return;
+    try {
+      const phraseRef = doc(db, 'users', user.uid, 'phrases', phraseId);
+      const phraseSnap = await getDocs(query(collection(db, 'users', user.uid, 'phrases')));
+      const phrase = phraseSnap.docs.find(doc => doc.id === phraseId);
+      
+      if (phrase) {
+        const currentAttempts = phrase.data().attempts || 0;
+        const currentLearned = phrase.data().isLearned || false;
+        
+        await setDoc(phraseRef, {
+          attempts: currentAttempts + 1,
+          isLearned: success ? true : currentLearned,
+          lastAttemptAt: new Date()
+        }, { merge: true });
+      }
+      
+      // 学習進捗を更新
+      const progressRef = doc(db, 'learningProgress', user.uid);
+      const progressSnap = await getDocs(query(collection(db, 'learningProgress')));
+      const progress = progressSnap.docs.find(doc => doc.id === user.uid);
+      
+      if (progress) {
+        const data = progress.data();
+        const learnedCount = success ? (data.learnedWords || 0) + 1 : (data.learnedWords || 0);
+        
+        await setDoc(progressRef, {
+          learnedWords: learnedCount,
+          todayProgress: (data.todayProgress || 0) + 1,
+          lastSessionAt: new Date(),
+          updatedAt: new Date()
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error('[Firestore] 学習進捗記録エラー:', error);
+    }
+  };
 
   const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
     return new Promise((resolve: (value: void) => void) => {
@@ -488,6 +607,8 @@ const App = () => {
     
     if (success) {
       setStatus("正解");
+      // 学習進捗を記録
+      await recordLearningProgress(phrase.id, true);
       await speak(phrase.ja, 'ja-JP');
       setTimeout(() => runSession(currentQueue, currentIndex + 1, trainingData, 0), 300);
     } else {
@@ -497,6 +618,8 @@ const App = () => {
       } else {
         // 最大再試行回数に達したためスキップ
         setStatus("スキップ");
+        // スキップ時も試行回数を記録
+        await recordLearningProgress(phrase.id, false);
         setTimeout(() => runSession(currentQueue, currentIndex + 1, trainingData, 0), 1500);
       }
     }
@@ -506,13 +629,8 @@ const App = () => {
   const handleStartTrainingFlow = async (): Promise<void> => {
     console.log("練習開始ボタン押下 - phrases:", phrases.length);
     
-    // phrasesが空の場合、CHENGYU_LISTをデフォルトとして使用
-    const trainingData = phrases.length > 0 ? phrases : CHENGYU_LIST.map((item, idx) => ({
-      id: idx.toString(),
-      zh: item.zh,
-      py: item.py,
-      ja: item.ja
-    }));
+    // phrasesを使用（Firestoreから自動で取得される）
+    const trainingData = phrases.length > 0 ? phrases : [];
     
     if (trainingData.length === 0) {
       console.warn("エラー: フレーズが登録されていません");
@@ -628,11 +746,13 @@ const App = () => {
           <main className="app-main">
             {view === 'start' && (
               <div className="start-view">
-                <div className={`chengyu-card ${isHandsFree ? 'handsfree' : 'normal'}`}>
-                  <div className={`chengyu-display font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{randomChengyu.zh}</div>
-                  <div className="chengyu-pinyin font-zh">{randomChengyu.py}</div>
-                  <div className="chengyu-meaning font-ja">{randomChengyu.ja}</div>
-                </div>
+                {randomChengyu && (
+                  <div className={`chengyu-card ${isHandsFree ? 'handsfree' : 'normal'}`}>
+                    <div className={`chengyu-display font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{randomChengyu.zh}</div>
+                    <div className="chengyu-pinyin font-zh">{randomChengyu.py}</div>
+                    <div className="chengyu-meaning font-ja">{randomChengyu.ja}</div>
+                  </div>
+                )}
                 <div className="start-button-group">
                   <button onClick={handleStartTrainingFlow} className={`start-training-btn font-ja ${isHandsFree ? 'handsfree' : 'normal'}`}>
                     <OrnatePlum size={32} /> 練習開始
@@ -673,8 +793,13 @@ const App = () => {
                     const recognized = await listenAndAdvance(trainingPhrases[shuffleQueue[queueIdx]].zh);
                     if (recognized) {
                       setStatus("認識されました！");
+                      // 学習進捗を記録
+                      await recordLearningProgress(trainingPhrases[shuffleQueue[queueIdx]].id, true);
                       await speak(trainingPhrases[shuffleQueue[queueIdx]].ja, 'ja-JP');
                       setStatus("進行中...");
+                    } else {
+                      // 失敗時も試行回数を記録
+                      await recordLearningProgress(trainingPhrases[shuffleQueue[queueIdx]].id, false);
                     }
                     setIsManualListening(false);
                   }} disabled={isManualListening} className={`retry-btn font-ja ${isHandsFree ? 'handsfree' : 'normal'}`}><RotateCcw size={18} /> 再挑戦</button>
