@@ -351,18 +351,6 @@ const App = () => {
           console.log(`[Firestore] マスターフレーズ ${phrasesSnapMaster.docs.length} 件をコピーしました`);
         }
         
-        // 学習進捗を初期化
-        batch.set(doc(db, 'learningProgress', uid), {
-          totalWords: phraseCount,
-          learnedWords: 0,
-          todayProgress: 0,
-          lastSessionAt: null,
-          streak: 0,
-          chengyuLearned: 0,
-          phrasesLearned: 0,
-          updatedAt: new Date()
-        });
-        
         await batch.commit();
         console.log(`[Firestore] ユーザー ${uid} を初期化しました`);
       } else {
@@ -392,23 +380,6 @@ const App = () => {
           attempts: currentAttempts + 1,
           isLearned: success ? true : currentLearned,
           lastAttemptAt: new Date()
-        }, { merge: true });
-      }
-      
-      // 学習進捗を更新
-      const progressRef = doc(db, 'learningProgress', user.uid);
-      const progressSnap = await getDocs(query(collection(db, 'learningProgress')));
-      const progress = progressSnap.docs.find(doc => doc.id === user.uid);
-      
-      if (progress) {
-        const data = progress.data();
-        const learnedCount = success ? (data.learnedWords || 0) + 1 : (data.learnedWords || 0);
-        
-        await setDoc(progressRef, {
-          learnedWords: learnedCount,
-          todayProgress: (data.todayProgress || 0) + 1,
-          lastSessionAt: new Date(),
-          updatedAt: new Date()
         }, { merge: true });
       }
     } catch (error) {

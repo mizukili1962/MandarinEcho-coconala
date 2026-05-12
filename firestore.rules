@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // マスターデータ：すべてのユーザーが読み取り可能
+    // 開発環境では初期化時に書き込み可能、本番環境では管理者のみ
+    match /masterData/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // 開発環境では全ユーザーに許可、本番環境で制限推奨
+    }
+    
+    // ユーザーは自分のデータのみアクセス可能
+    match /users/{uid} {
+      allow read, write: if request.auth.uid == uid;
+      match /chengyu/{document=**} {
+        allow read, write: if request.auth.uid == uid;
+      }
+      match /phrases/{document=**} {
+        allow read, write: if request.auth.uid == uid;
+      }
+      match /vocabularies/{document=**} {
+        allow read, write: if request.auth.uid == uid;
+      }
+    }
+  }
+}

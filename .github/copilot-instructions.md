@@ -145,17 +145,7 @@ users/
 │   │       ├── lastAttemptAt: timestamp（最終試行日時）
 │   │       └── createdAt: timestamp
 
-│
-learningProgress/
-├── {uid}/
-│   ├── totalWords: number（総単語数）
-│   ├── learnedWords: number（習得単語数）
-│   ├── todayProgress: number（本日の進捗数）
-│   ├── lastSessionAt: timestamp（最後のセッション日時）
-│   ├── streak: number（連続学習日数）
-│   ├── chengyuLearned: number（成語習得数）
-│   ├── phrasesLearned: number（フレーズ習得数）
-│   └── updatedAt: timestamp
+
 ```
 
 ### コレクション構成
@@ -185,9 +175,6 @@ service cloud.firestore {
         allow read, write: if request.auth.uid == uid;
       }
     }
-    match /learningProgress/{uid} {
-      allow read, write: if request.auth.uid == uid;
-    }
   }
 }
 ```
@@ -204,7 +191,7 @@ service cloud.firestore {
   - マスターデータは読み込みのみ（キャッシュ活用で読み取り回数削減）
   - 単語帳編集時は `saveToCloud()` で一括更新（個別更新を避ける）
   - 不要なリアルタイムリスナーは適切に削除
-- **学習進捗の追跡**: 各フレーズの `isLearned`, `attempts`, `lastAttemptAt` で学習状況を記録
+- **単語帳管理**: 各フレーズの `isLearned`, `attempts`, `lastAttemptAt` で学習状況をユーザーの個別データで管理
 
 ### 実装時の注意点
 - Firestore呼び出しは非同期処理で、エラーハンドリングを必須とする
@@ -212,7 +199,7 @@ service cloud.firestore {
 - 新規ユーザー登録時に `writeBatch()` を用いて、マスターデータを `users/{uid}/chengyu/` と `users/{uid}/phrases/` にコピー
 - 単語帳管理：UI上でかけた単語は `users/{uid}/phrases/` に一時一時上上しし、`saveToCloud()` で一括㘃4して保存
 - 学習データ同期時は、ローカルキャッシュとの整合性を保つ
-- ユーザーが学習済みデータを削除・リセットする場合は、対応するドキュメントを削除し、`learningProgress` を更新
+- ユーザーが学習済みデータを削除・リセットする場合は、対応するドキュメントを削除
 - マスターデータは変更頻度が低いため、一度読み込んだらローカルキャッシュを活用
 
 ## 開発方針
@@ -247,7 +234,7 @@ my-app/
 - **動作確認**: コードを編集したら、必ず「npm run build」と「npm run preview」で動作確認を行うこと
 - **Firestore 操作**: `onSnapshot()` でリアルタイム同期、バッチ操作には `writeBatch()` を使用
 - **単語帳管理**: ユーザーが追加・編集・削除した単語は `users/{uid}/phrases/` に直接保存
-- **学習進捗**: 各フレーズの `isLearned`, `attempts`, `lastAttemptAt` で追跡。`recordLearningProgress()` で更新
+- **学習進捗**: 各フレーズの `isLearned`, `attempts`, `lastAttemptAt` で学習状況をユーザーの個別データで管理
 - **エラーハンドリング**: Firestore呼び出しは必ずtry-catchで囲む。ネットワークエラー時の動作も定義
 - **型安全性**: TypeScript の型定義を厳密に保つ
 - **UI/CSS**: JS注入ではなく、CSS ファイルで実装を優先する
