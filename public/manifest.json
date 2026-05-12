@@ -1,0 +1,26 @@
+{
+  "name": "Mandarin Echo",
+  "short_name": "Mandarin Echo",
+  "description": "中国語の発音を学ぶための学習アプリ",
+  "theme_color": "#3F9877",
+  "background_color": "#0f172a",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}
