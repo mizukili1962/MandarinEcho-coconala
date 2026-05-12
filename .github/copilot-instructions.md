@@ -244,6 +244,7 @@ my-app/
 
 ## Copilotへの指示
 - **実装方針**: ハードコードデータはすべて削除済み。データは必ず Firestore から取得するように実装する
+- **動作確認**: コードを編集したら、必ず「npm run build」と「npm run preview」で動作確認を行うこと
 - **Firestore 操作**: `onSnapshot()` でリアルタイム同期、バッチ操作には `writeBatch()` を使用
 - **単語帳管理**: ユーザーが追加・編集・削除した単語は `users/{uid}/phrases/` に直接保存
 - **学習進捗**: 各フレーズの `isLearned`, `attempts`, `lastAttemptAt` で追跡。`recordLearningProgress()` で更新

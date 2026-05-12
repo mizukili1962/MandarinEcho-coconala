@@ -129,10 +129,20 @@ const App = () => {
 
 
   const [isManualListening, setIsManualListening] = useState(false);
+  const [isChengyuModalOpen, setIsChengyuModalOpen] = useState(false);
+  const [isChengyuManageModalOpen, setIsChengyuManageModalOpen] = useState(false);
+  const [isChengyuImportModalOpen, setIsChengyuImportModalOpen] = useState(false);
+  const [editingChengyu, setEditingChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
+  const [chengyuModalMessage, setChengyuModalMessage] = useState("");
+  const [chengyuModalSuccess, setChengyuModalSuccess] = useState(false);
+  const [chengyuImportText, setChengyuImportText] = useState("");
+  const [chengyuImportMessage, setChengyuImportMessage] = useState("");
+  const [chengyuImportSuccess, setChengyuImportSuccess] = useState(false);
 
   const isAborted = useRef(false);
   const recognitionRef = useRef<any>(null);
   const importFormRef = useRef<HTMLFormElement>(null);
+  const chengyuImportFormRef = useRef<HTMLFormElement>(null);
 
 
   const [randomChengyu, setRandomChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
@@ -166,6 +176,32 @@ const App = () => {
     };
     fetchChengyuList();
   }, []);
+
+  // 成語を保存
+  const saveChengyuToCloud = async (newChengyuList: Array<{zh: string; py: string; ja: string}>): Promise<void> => {
+    try {
+      const batch = writeBatch(db);
+      
+      // 既存の成語をすべて削除
+      const existingSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
+      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
+      
+      // 新しい成語を登録
+      newChengyuList.forEach((chengyu, idx) => {
+        batch.set(doc(db, 'masterData', 'chengyu', 'list', idx.toString()), {
+          chinese: chengyu.zh,
+          pinyin: chengyu.py,
+          japanese: chengyu.ja,
+          createdAt: new Date()
+        });
+      });
+      
+      await batch.commit();
+      console.log(`[Firestore] ${newChengyuList.length} 件の成語を保存しました`);
+    } catch (error) {
+      console.error('[Firestore] 成語保存エラー:', error);
+    }
+  };
 
 
   useEffect(() => {
@@ -751,6 +787,9 @@ const App = () => {
                     <div className={`chengyu-display font-zh ${isHandsFree ? 'text-[#ffd700]' : 'text-white'}`}>{randomChengyu.zh}</div>
                     <div className="chengyu-pinyin font-zh">{randomChengyu.py}</div>
                     <div className="chengyu-meaning font-ja">{randomChengyu.ja}</div>
+                    <div className="chengyu-button-group font-ja">
+                      <button onClick={() => setIsChengyuManageModalOpen(true)} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '2px solid white', cursor: 'pointer', backgroundColor: 'transparent', color: 'white' }}><Edit2 size={18}/></button>
+                    </div>
                   </div>
                 )}
                 <div className="start-button-group">
@@ -893,16 +932,7 @@ const App = () => {
                <input name="py" defaultValue={editingPhrase?.py} placeholder="ピンイン" className="form-input font-zh" disabled={modalMessage !== ""} />
                <input name="ja" defaultValue={editingPhrase?.ja} placeholder="意味" required className="form-input font-ja" disabled={modalMessage !== ""} />
                {modalMessage && (
-                 <div style={{
-                   marginTop: '1rem',
-                   padding: '0.75rem',
-                   borderRadius: '0.5rem',
-                   backgroundColor: modalSuccess ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                   color: modalSuccess ? '#22c55e' : '#ef4444',
-                   textAlign: 'center',
-                   fontSize: '0.875rem',
-                   fontWeight: '700'
-                 }}>
+                 <div className={`status-message ${modalSuccess ? 'success' : 'error'}`}>
                    {modalMessage}
                  </div>
                )}
@@ -915,6 +945,176 @@ const App = () => {
         </div>
       )}
 
+
+      {isChengyuManageModalOpen && (
+        <div className="modal-overlay font-ja">
+          <div className="modal-content chengyu-manage-modal-content">
+            <button onClick={() => setIsChengyuManageModalOpen(false)} className="modal-close-btn"><X size={20}/></button>
+            <h3 className="modal-header">成語を管理</h3>
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+              <button onClick={() => { setEditingChengyu(null); setIsChengyuManageModalOpen(false); setIsChengyuModalOpen(true); }} className="chengyu-add-button font-ja">+ 新規追加</button>
+              <button onClick={() => setIsChengyuImportModalOpen(true)} className="chengyu-add-button-bulk font-ja" style={{ flex: 1 }}>一括登録</button>
+            </div>
+            <div className="chengyu-list">
+              {allChengyuList.map((chengyu, idx) => (
+                <div key={idx} className="chengyu-list-item">
+                  <div className="chengyu-list-item-left">
+                    <div className="chengyu-list-item-zh font-zh">{chengyu.zh}</div>
+                    <div className="chengyu-list-item-py font-zh">{chengyu.py}</div>
+                    <div className="chengyu-list-item-ja font-ja">{chengyu.ja}</div>
+                  </div>
+                  <div className="chengyu-list-item-right">
+                    <button onClick={() => { setEditingChengyu(chengyu); setIsChengyuManageModalOpen(false); setIsChengyuModalOpen(true); }} className="chengyu-button-small edit font-ja">編集</button>
+                    <button onClick={() => { if (confirm('本当に削除しますか？')) { const updated = allChengyuList.filter(c => c.zh !== chengyu.zh); setAllChengyuList(updated); saveChengyuToCloud(updated); if (updated.length === 0) setRandomChengyu(null); } }} className="chengyu-button-small delete font-ja">削除</button>
+                  </div>
+                </div>
+              ))}
+              {allChengyuList.length === 0 && (
+                <div className="chengyu-empty-message font-ja">成語がまだ登録されていません</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isChengyuImportModalOpen && (
+        <div className="modal-overlay font-ja">
+          <form ref={chengyuImportFormRef} className="modal-content relative" onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            
+            if (!chengyuImportText.trim()) {
+              setChengyuImportMessage("テキストを入力してください");
+              setChengyuImportSuccess(false);
+              return;
+            }
+            
+            const lines = chengyuImportText.split('\n').filter((l: string) => l.trim());
+            const allItems = lines.map((line: string) => {
+              const pts = line.split(/[,\t\s\u3000]+/).map((s: string) => s.trim()).filter((s: string) => s);
+              if (pts.length < 2) return null;
+              const zh = pts[0];
+              const ja = pts[pts.length - 1];
+              const py = pts.length > 2 ? pts.slice(1, -1).join(' ') : '';
+              return { zh, py, ja };
+            }).filter((i: any): i is {zh: string; py: string; ja: string} => i !== null);
+            
+            // 既存の中国語を集める
+            const existingZh = new Set(allChengyuList.map(c => c.zh));
+            
+            // 重複していないアイテムのみフィルタリング
+            const newItems = allItems.filter(item => !existingZh.has(item.zh));
+            const duplicateCount = allItems.length - newItems.length;
+            
+            if (newItems.length === 0 && allItems.length > 0) {
+              setChengyuImportMessage(`登録済み: ${duplicateCount}件 (新規登録なし)`);
+              setChengyuImportSuccess(false);
+              return;
+            }
+            
+            if (newItems.length > 0) {
+              // 成功メッセージを即座に表示
+              const msg = duplicateCount > 0 
+                ? `✓ ${newItems.length}件登録しました (重複: ${duplicateCount}件)`
+                : `✓ ${newItems.length}件登録しました`;
+              setChengyuImportMessage(msg);
+              setChengyuImportSuccess(true);
+              setChengyuImportText("");
+              
+              // その後、登録処理を実行
+              const updated = [...allChengyuList, ...newItems];
+              setAllChengyuList(updated);
+              await saveChengyuToCloud(updated);
+              
+              // 1.5秒後にモーダルを關じる
+              setTimeout(() => {
+                setIsChengyuImportModalOpen(false);
+                setChengyuImportMessage("");
+                setChengyuImportSuccess(false);
+                chengyuImportFormRef.current?.reset();
+              }, 1500);
+            } else {
+              setChengyuImportMessage("有効なデータがありません");
+              setChengyuImportSuccess(false);
+            }
+          }}>
+             <button type="button" onClick={() => { chengyuImportFormRef.current?.reset(); setChengyuImportText(""); setIsChengyuImportModalOpen(false); setChengyuImportMessage(""); setChengyuImportSuccess(false); }} className="modal-close-btn"><X size={20}/></button>
+             <h3 className="modal-header">成語を一括登録</h3>
+             <div className="modal-form">
+               <textarea value={chengyuImportText} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setChengyuImportText(e.target.value)} placeholder="一矢 yĭ shǔ 盗賌 響龜" className="form-textarea" />
+               {chengyuImportMessage && (
+                 <div className={`status-message large ${chengyuImportSuccess ? 'success' : 'error'}`}>
+                   {chengyuImportMessage}
+                 </div>
+               )}
+               <button type="submit" className="modal-submit-btn">実行</button>
+             </div>
+          </form>
+        </div>
+      )}
+
+      {isChengyuModalOpen && (
+        <div className="modal-overlay font-ja">
+          <form onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            
+            const isEditing = !!editingChengyu;
+            setChengyuModalMessage(isEditing ? '✓ 編集しました' : '✓ 追加しました');
+            setChengyuModalSuccess(true);
+            
+            const fd = new FormData(e.currentTarget);
+            const zh = fd.get('zh') as string;
+            const py = fd.get('py') as string;
+            const ja = fd.get('ja') as string;
+            
+            // 重複チェック（編集時は除外）
+            if (!editingChengyu) {
+              const isDuplicate = allChengyuList.some(c => c.zh === zh);
+              if (isDuplicate) {
+                alert(`「${zh}」は既に登録されています`);
+                setChengyuModalMessage("");
+                setChengyuModalSuccess(false);
+                return;
+              }
+            }
+            
+            const newItem = { zh, py, ja };
+            const updated = editingChengyu 
+              ? allChengyuList.map(c => c.zh === editingChengyu.zh ? newItem : c)
+              : [...allChengyuList, newItem];
+            
+            setAllChengyuList(updated);
+            await saveChengyuToCloud(updated);
+            setRandomChengyu(updated[0]);
+            
+            // 1.5秒後にモーダルを閉じる
+            setTimeout(() => {
+              setIsChengyuModalOpen(false);
+              setEditingChengyu(null);
+              setChengyuModalMessage("");
+              setChengyuModalSuccess(false);
+              // 管理モーダルを再度開く
+              setIsChengyuManageModalOpen(true);
+            }, 1500);
+          }} className="modal-content relative">
+             <button onClick={() => { setIsChengyuModalOpen(false); setEditingChengyu(null); setChengyuModalMessage(""); setChengyuModalSuccess(false); }} className="modal-close-btn"><X size={20}/></button>
+             <h3 className="modal-header">成語を{editingChengyu ? '編集' : '追加'}</h3>
+             <div className="modal-form">
+               <input name="zh" defaultValue={editingChengyu?.zh} placeholder="中国語" required className="form-input font-zh" disabled={chengyuModalMessage !== ""} />
+               <input name="py" defaultValue={editingChengyu?.py} placeholder="ピンイン" className="form-input font-zh" disabled={chengyuModalMessage !== ""} />
+               <input name="ja" defaultValue={editingChengyu?.ja} placeholder="意味" required className="form-input font-ja" disabled={chengyuModalMessage !== ""} />
+               {chengyuModalMessage && (
+                 <div className={`status-message ${chengyuModalSuccess ? 'success' : 'error'}`}>
+                   {chengyuModalMessage}
+                 </div>
+               )}
+               <div className="modal-button-group">
+                <button type="button" onClick={() => { setIsChengyuModalOpen(false); setEditingChengyu(null); setChengyuModalMessage(""); setChengyuModalSuccess(false); }} className="modal-cancel-btn">戻る</button>
+                <button type="submit" className="modal-submit-btn" disabled={chengyuModalMessage !== ""}>保存</button>
+               </div>
+             </div>
+          </form>
+        </div>
+      )}
 
       {isImportModalOpen && (
         <div className="modal-overlay font-ja">
@@ -973,16 +1173,7 @@ const App = () => {
              <div className="modal-form">
                <textarea value={importText} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setImportText(e.target.value)} placeholder="你好 nǐ hǎo こんにちは" className="form-textarea" />
                {importMessage && (
-                 <div style={{
-                   marginTop: '1rem',
-                   padding: '1rem',
-                   borderRadius: '0.75rem',
-                   backgroundColor: importSuccess ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                   color: importSuccess ? '#22c55e' : '#ef4444',
-                   textAlign: 'center',
-                   fontSize: '0.875rem',
-                   fontWeight: '700'
-                 }}>
+                 <div className={`status-message large ${importSuccess ? 'success' : 'error'}`}>
                    {importMessage}
                  </div>
                )}
