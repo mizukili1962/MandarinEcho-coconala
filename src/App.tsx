@@ -143,6 +143,7 @@ const App = () => {
   const recognitionRef = useRef<any>(null);
   const importFormRef = useRef<HTMLFormElement>(null);
   const chengyuImportFormRef = useRef<HTMLFormElement>(null);
+  const isAuthProcessing = useRef(false); // ポップアップ処理中のフラグ
 
 
   const [randomChengyu, setRandomChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
@@ -156,8 +157,10 @@ const App = () => {
     }
   }, [view, allChengyuList]);
 
-  // Firestore から成語リストを取得
+  // Firestore から成語リストを取得（ユーザーログイン後のみ）
   useEffect(() => {
+    if (!user) return; // ユーザーがログインしていない場合はスキップ
+    
     const fetchChengyuList = async () => {
       try {
         const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
@@ -175,7 +178,7 @@ const App = () => {
       }
     };
     fetchChengyuList();
-  }, []);
+  }, [user]);
 
   // 成語を保存
   const saveChengyuToCloud = async (newChengyuList: Array<{zh: string; py: string; ja: string}>): Promise<void> => {
@@ -208,14 +211,13 @@ const App = () => {
     const initAuth = async () => {
       try { await signInAnonymously(auth); } catch (e) {}
       
-      // マスターデータを初期化
-      await initializeMasterData();
-      
       const unsubscribe = onAuthStateChanged(auth, async (u: User | null) => {
         setUser(u);
         if (u) {
           // ユーザー初期化：新規ユーザーの場合のみデータを登録
           await initializeUserData(u.uid, u.email || '', u.displayName || 'ゲスト');
+          // マスターデータを初期化（ユーザーログイン後）
+          await initializeMasterData();
         }
         setLoading(false);
       });
@@ -441,8 +443,8 @@ const App = () => {
       rec.maxAlternatives = 3;
       
       let timeoutId: any = null;
-      const MAX_LISTEN_TIME = 7000; // 7秒のタイムアウト
-      const IGNORE_FIRST_RESULTS_MS = 1000; // 最初の1秒の結果を無視（お手本完全終了を確保）
+      const MAX_LISTEN_TIME = 5000; // 5秒のタイムアウト（ネイティブ発話に対応）
+      const IGNORE_FIRST_RESULTS_MS = 300; // 最初の300msのみ無視（ノイズフィルタリング）
       let recognitionStartTime = 0;
       let hasReceivedValidResult = false; // 有効な結果を受け取ったかどうか
       let hasResolved = false; // 既に結果を返したかどうかのフラグ
@@ -471,10 +473,10 @@ const App = () => {
         let interimTranscript = '';
         let finalTranscript = '';
         
-        // 最初の2秒の結果を無視
+        // 最初の300msの結果を無視（ノイズフィルタリング）
         const elapsedTime = Date.now() - recognitionStartTime;
         if (elapsedTime < IGNORE_FIRST_RESULTS_MS) {
-          console.log(`[音声認識] 無視中: ${elapsedTime}ms - 最初の${IGNORE_FIRST_RESULTS_MS}msは無視します`);
+          console.log(`[音声認識] 無視中: ${elapsedTime}ms - ノイズフィルタリング`);
           return;
         }
         
@@ -507,9 +509,9 @@ const App = () => {
               return;
             }
             
-            // 類似度チェック（編集距離を使用した簡易実装）
+            // 類似度チェック（より厳密な判定：0.75以上が必要）
             const similarity = calculateSimilarity(result, targetZh);
-            if (similarity > 0.65) {
+            if (similarity > 0.75) {
               console.log(`[音声認識] 類似度一致: "${result}" (${(similarity * 100).toFixed(1)}%)`);
               resolveOnce(true);
               rec.stop();
@@ -602,8 +604,8 @@ const App = () => {
     
     if (isAborted.current) return;
     
-    // お手本の余韻を完全に避けるため、1.5秒待機
-    await new Promise(r => setTimeout(r, 1000));
+    // お手本の余韻を完全に避けるため、700msを待機（新しい認識タイムアウトに対応）
+    await new Promise(r => setTimeout(r, 700));
     
     if (isAborted.current) return;
     
@@ -707,11 +709,22 @@ const App = () => {
             <div className="login-buttons">
               <button
                 onClick={async () => {
+                  // ポップアップ処理中は無視
+                  if (isAuthProcessing.current) return;
+                  
                   try {
+                    isAuthProcessing.current = true;
+                    // 既存のポップアップをクリアしてから新規ログイン
+                    window.focus();
                     const provider = new GoogleAuthProvider();
                     await signInWithPopup(auth, provider);
-                  } catch (error) {
-                    console.error('ログインエラー:', error);
+                  } catch (error: any) {
+                    // キャンセルエラーは無視（ユーザーがポップアップを閉じた）
+                    if (error?.code !== 'auth/cancelled-popup-request') {
+                      console.error('ログインエラー:', error);
+                    }
+                  } finally {
+                    isAuthProcessing.current = false;
                   }
                 }}
                 className="login-btn google-login-btn font-ja"
@@ -743,7 +756,26 @@ const App = () => {
                   <div className="user-info font-ja">
                     <div className="user-name">{user.displayName || user.email || 'ゲスト'}</div>
                   </div>
-                  <button onClick={() => signOut(auth)} className="text-white"><LogOut size={20} /></button>
+                  <button 
+                    onClick={async () => {
+                      // ポップアップ処理中は無視
+                      if (isAuthProcessing.current) return;
+                      
+                      try {
+                        isAuthProcessing.current = true;
+                        await signOut(auth);
+                        // ログアウト成功時はユーザーは自動的に null になり、UI が更新される
+                      } catch (error) {
+                        console.error('ログアウトエラー:', error);
+                        // ログアウトエラーは通常無視（既にサインアウト状態の可能性）
+                      } finally {
+                        isAuthProcessing.current = false;
+                      }
+                    }} 
+                    className="text-white"
+                  >
+                    <LogOut size={20} />
+                  </button>
                 </>
               )}
             </div>
