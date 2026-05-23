@@ -1,8 +1,8 @@
 /* Mandarin Echo Identity Style Sheet */
 
 :root {
-  --primary-color: #2563EB;
-  --secondary-color: #1D4ED8;
+  --primary-color: #3F9877;
+  --secondary-color: #2D7A5E;
   --handsfree-mode-color: #900C0C;
   --handsfree-header-color: #700000;
   --accent-gold: #FFD700;
@@ -105,7 +105,7 @@ input::placeholder {
 }
 
 .app-header.normal {
-  background-color: rgba(37, 99, 235, 0.6);
+  background-color: rgba(45, 122, 94, 0.6);
 }
 
 .app-header.handsfree {
@@ -369,7 +369,7 @@ input::placeholder {
 
 .start-training-btn.normal {
   background-color: white;
-  color: #2563EB;
+  color: #3F9877;
 }
 
 .start-training-btn.handsfree {
@@ -679,7 +679,7 @@ input::placeholder {
 
 .retry-btn.normal {
   background-color: white;
-  color: #2563EB;
+  color: #3F9877;
 }
 
 .retry-btn.handsfree {
@@ -899,7 +899,7 @@ input::placeholder {
 }
 
 .app-nav.normal {
-  background-color: rgba(37, 99, 235, 0.8);
+  background-color: rgba(45, 122, 94, 0.8);
 }
 
 .app-nav.handsfree {
@@ -935,7 +935,7 @@ input::placeholder {
 
 .nav-btn.active {
   background-color: white;
-  color: #2563EB;
+  color: #3F9877;
 }
 
 .app-nav.handsfree .nav-btn.active {
@@ -1196,7 +1196,7 @@ input::placeholder {
   }
 
   .chengyu-add-button {
-    background-color: #2563EB;
+    background-color: #3F9877;
   }
 
   .chengyu-add-button-bulk {
@@ -1277,7 +1277,7 @@ input::placeholder {
   }
 
   .chengyu-button-small.edit {
-    background-color: #2563EB;
+    background-color: #3F9877;
   }
 
   .chengyu-button-small.delete {
