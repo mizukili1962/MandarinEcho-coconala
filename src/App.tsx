@@ -174,36 +174,7 @@ const App = () => {
     return unsubscribe;
   }, [user, view]);
 
-
-  const saveToCloud = async (newPhrases: Array<{id: string; zh: string; py: string; ja: string}>): Promise<void> => {
-    if (!user) return;
-    try {
-      const batch = writeBatch(db);
-      
-      // 既存のフレーズをすべて削除
-      const existingSnap = await getDocs(collection(db, 'users', user.uid, 'phrases'));
-      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
-      
-      // 新しいフレーズを登録
-      newPhrases.forEach((phrase) => {
-        batch.set(doc(db, 'users', user.uid, 'phrases', phrase.id), {
-          chinese: phrase.zh,
-          pinyin: phrase.py,
-          japanese: phrase.ja,
-          isLearned: false,
-          attempts: 0,
-          lastAttemptAt: null,
-          createdAt: new Date()
-        });
-      });
-      
-      await batch.commit();
-      console.log(`[Firestore] ${newPhrases.length} 件のフレーズを保存しました`);
-    } catch (error) {
-      console.error('[Firestore] 保存エラー:', error);
-    }
-  };
-
+import { saveToCloud } from './firebaseFunctions';
 
   // マスターデータの初期化（既にFirestoreに登録済み）
   const initializeMasterData = async (): Promise<void> => {
