@@ -42,9 +42,17 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingPhrase, setEditingPhrase] = useState<{id: string; zh: string; py: string; ja: string} | null>(null);
+  
   const [importText, setImportText] = useState("");
   const [importMessage, setImportMessage] = useState("");
   const [importSuccess, setImportSuccess] = useState(false);
+  
+  const [importState, setImportState] = useState({
+  text: "",
+  message: "",
+  success: false,
+});
+  
   const [modalMessage, setModalMessage] = useState("");
   const [modalSuccess, setModalSuccess] = useState(false);
 
