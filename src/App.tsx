@@ -17,16 +17,12 @@ import {
   FileText, X, RotateCcw
 } from 'lucide-react';
 import './App.css'
-
 import { auth, db } from './firebase';
-
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
-
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
-
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
-
 import { OrnateChrysanthemum } from './components_見た目/icons_装飾/OrnateChrysanthemum';
+import { fetchChengyuList } from './services/chengyuService';
 
 
 // Firestore から動的に取得するため、ハードコードされたデータは削除
@@ -86,7 +82,6 @@ const App = () => {
     const fetchChengyuList = async () => {
       try {
 
-import { fetchChengyuList } from './services/chengyuService';
 
         const list = await fetchChengyuList();
        
