@@ -85,12 +85,11 @@ const App = () => {
   useEffect(() => {
     const fetchChengyuList = async () => {
       try {
-        const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
-        const list = chengyuSnap.docs.map(doc => ({
-          zh: doc.data().chinese,
-          py: doc.data().pinyin,
-          ja: doc.data().japanese
-        }));
+
+import { fetchChengyuList } from './services/chengyuService';
+
+        const list = await fetchChengyuList();
+       
         setAllChengyuList(list);
         if (list.length > 0) {
           setRandomChengyu(list[0]);
