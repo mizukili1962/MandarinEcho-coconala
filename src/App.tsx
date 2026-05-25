@@ -143,30 +143,30 @@ const App = () => {
     initAuth();
   }, []);
 
+useEffect(() => {
+  if (!user) return;
 
-  useEffect(() => {
-    if (!user) return;
-    
-    // Firestore からリアルタイムでフレーズを同期
-    const phrasesCollectionRef = collection(db, 'users', user.uid, 'phrases');
-    const unsubscribe = onSnapshot(phrasesCollectionRef, (snap) => {
-      if (view !== 'learn') {
-        const loadedPhrases = snap.docs.map(doc => ({
-          id: doc.id,
-          zh: doc.data().chinese || '',
-          py: doc.data().pinyin || '',
-          ja: doc.data().japanese || ''
-        }));
-        
-        // Firestore からのデータを使用
-        if (loadedPhrases.length > 0) {
-          setPhrases(loadedPhrases);
-        }
-      }
-    }, (err) => console.error('[Firestore] リスナーエラー:', err));
-    
-    return unsubscribe;
-  }, [user, view]);
+  const phrasesCollectionRef = collection(db, 'users', user.uid, 'phrases');
+
+  const unsubscribe = onSnapshot(
+    phrasesCollectionRef,
+    (snap) => {
+      if (view === 'learn') return;
+
+      const loadedPhrases = snap.docs.map((d) => ({
+        id: d.id,
+        zh: d.data().chinese || '',
+        py: d.data().pinyin || '',
+        ja: d.data().japanese || ''
+      }));
+
+      setPhrases(loadedPhrases);
+    },
+    (err) => console.error('[Firestore] リスナーエラー:', err)
+  );
+
+  return unsubscribe;
+}, [user, view]);
 
 import { saveToCloud } from './firebaseFunctions';
 
