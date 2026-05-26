@@ -20,7 +20,7 @@ import './App.css'
 import { initializeMasterData } from './services/userService';
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
-import { initializeMasterData, recordLearningProgress } from './services/userService';
+import { initializeMasterData, recordLearningProgress, initializeUserData} from './services/userService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -178,73 +178,6 @@ useEffect(() => {
 
   return unsubscribe;
 }, [user, view]);
-
-  // ユーザー初期化：新規ユーザーの場合、Firestore に必要なデータを作成
-  const initializeUserData = async (uid: string, email: string, displayName: string): Promise<void> => {
-    try {
-      const userDocRef = doc(db, 'users', uid);
-      
-      // ユーザードキュメント作成（merge: true で既存データを保護）
-      await setDoc(userDocRef, {
-        email: email,
-        displayName: displayName,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }, { merge: true });
-      
-      // サブコレクション存在チェック：phrasesが存在するかで初期化済み判定
-      const phrasesSnap = await getDocs(collection(db, 'users', uid, 'phrases'));
-      
-      if (phrasesSnap.empty) {
-        // 初期化が必要
-        console.log(`[Firestore] ユーザー ${uid} のマスターデータコピーを開始します`);
-        const batch = writeBatch(db);
-        
-        // マスターデータから成語をコピー
-        const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
-        if (!chengyuSnap.empty) {
-          chengyuSnap.docs.forEach((masterDoc) => {
-            batch.set(doc(db, 'users', uid, 'chengyu', masterDoc.id), {
-              chinese: masterDoc.data().chinese,
-              pinyin: masterDoc.data().pinyin,
-              japanese: masterDoc.data().japanese,
-              isLearned: false,
-              attempts: 0,
-              lastAttemptAt: null,
-              createdAt: new Date()
-            });
-          });
-          console.log(`[Firestore] マスター成語 ${chengyuSnap.docs.length} 件をコピーしました`);
-        }
-        
-        // マスターデータからフレーズをコピー
-        const phrasesSnapMaster = await getDocs(collection(db, 'masterData', 'phrases', 'list'));
-        let phraseCount = 0;
-        if (!phrasesSnapMaster.empty) {
-          phrasesSnapMaster.docs.forEach((masterDoc) => {
-            batch.set(doc(db, 'users', uid, 'phrases', masterDoc.id), {
-              chinese: masterDoc.data().chinese,
-              pinyin: masterDoc.data().pinyin,
-              japanese: masterDoc.data().japanese,
-              isLearned: false,
-              attempts: 0,
-              lastAttemptAt: null,
-              createdAt: new Date()
-            });
-            phraseCount++;
-          });
-          console.log(`[Firestore] マスターフレーズ ${phrasesSnapMaster.docs.length} 件をコピーしました`);
-        }
-        
-        await batch.commit();
-        console.log(`[Firestore] ユーザー ${uid} を初期化しました`);
-      } else {
-        console.log(`[Firestore] ユーザー ${uid} は既に初期化済みです`);
-      }
-    } catch (error) {
-      console.error('[Firestore] ユーザー初期化エラー:', error);
-    }
-  };
 
   // フレーズデータを Firestore から読み込み（onSnapshot で自動同期されるため不要）
   // 削除して、useEffect の onSnapshot で対応
