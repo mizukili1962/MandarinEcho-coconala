@@ -88,7 +88,7 @@ const App = () => {
 
   // Firestore から成語リストを取得
   useEffect(() => {
-    const fetchChengyuList = async () => {
+    const loadChengyuList = async () => {
       try {
 
 
@@ -102,7 +102,7 @@ const App = () => {
         console.error('[Firestore] 成語リスト取得エラー:', error);
       }
     };
-    fetchChengyuList();
+    loadChengyuList();
   }, []);
 
   // 成語を保存
