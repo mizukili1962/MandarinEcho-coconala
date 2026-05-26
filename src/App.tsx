@@ -20,6 +20,7 @@ import './App.css'
 import { initializeMasterData } from './services/userService';
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
+import { initializeMasterData, recordLearningProgress } from './services/userService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -249,27 +250,6 @@ useEffect(() => {
   // 削除して、useEffect の onSnapshot で対応
 
   // 学習進捗を記録
-  const recordLearningProgress = async (phraseId: string, success: boolean): Promise<void> => {
-    if (!user) return;
-    try {
-      const phraseRef = doc(db, 'users', user.uid, 'phrases', phraseId);
-      const phraseSnap = await getDocs(query(collection(db, 'users', user.uid, 'phrases')));
-      const phrase = phraseSnap.docs.find(doc => doc.id === phraseId);
-      
-      if (phrase) {
-        const currentAttempts = phrase.data().attempts || 0;
-        const currentLearned = phrase.data().isLearned || false;
-        
-        await setDoc(phraseRef, {
-          attempts: currentAttempts + 1,
-          isLearned: success ? true : currentLearned,
-          lastAttemptAt: new Date()
-        }, { merge: true });
-      }
-    } catch (error) {
-      console.error('[Firestore] 学習進捗記録エラー:', error);
-    }
-  };
 
   const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
     return new Promise((resolve: (value: void) => void) => {
