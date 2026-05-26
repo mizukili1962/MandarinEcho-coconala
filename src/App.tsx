@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import './App.css'
 import { auth, db } from './firebase';
+import { saveToCloud } from './firebaseFunctions';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -175,8 +176,6 @@ useEffect(() => {
 
   return unsubscribe;
 }, [user, view]);
-
-import { saveToCloud } from './firebaseFunctions';
 
   // マスターデータの初期化（既にFirestoreに登録済み）
   const initializeMasterData = async (): Promise<void> => {
