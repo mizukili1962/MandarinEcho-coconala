@@ -17,6 +17,7 @@ import {
   FileText, X, RotateCcw
 } from 'lucide-react';
 import './App.css'
+import { initializeMasterData } from './services/userService';
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
@@ -176,20 +177,6 @@ useEffect(() => {
 
   return unsubscribe;
 }, [user, view]);
-
-  // マスターデータの初期化（既にFirestoreに登録済み）
-  const initializeMasterData = async (): Promise<void> => {
-    try {
-      const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
-      if (!chengyuSnap.empty) {
-        console.log(`[Firestore] マスターデータ確認済み (成語: ${chengyuSnap.docs.length}件)`);
-      } else {
-        console.warn('[Firestore] マスターデータが見つかりません。Firebase Consoleから登録してください。');
-      }
-    } catch (error) {
-      console.error('[Firestore] マスターデータ確認エラー:', error);
-    }
-  };
 
   // ユーザー初期化：新規ユーザーの場合、Firestore に必要なデータを作成
   const initializeUserData = async (uid: string, email: string, displayName: string): Promise<void> => {
