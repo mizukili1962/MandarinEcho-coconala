@@ -1,9 +1,6 @@
 import { writeBatch, collection, getDocs, doc } from 'firebase/firestore';
 import { db } from './firebase';
-import {
-  saveToCloud,
-  saveChengyuToCloud
-} from './firebaseFunctions';
+
 export const saveToCloud = async (
   user: any,
   newPhrases: any
