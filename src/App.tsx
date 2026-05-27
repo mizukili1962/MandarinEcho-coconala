@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  getAuth, 
   signInAnonymously, 
   onAuthStateChanged, 
   signOut, 
@@ -8,7 +7,13 @@ import {
   signInWithPopup,
   type User
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot, writeBatch, collection, getDocs, query } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  onSnapshot,
+  collection,
+  query
+} from 'firebase/firestore';
 import { 
   Mic, LogOut, ChevronLeft, 
   Plus, Trash2, Edit2,
