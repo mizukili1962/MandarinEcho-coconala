@@ -1,6 +1,9 @@
 import { writeBatch, collection, getDocs, doc } from 'firebase/firestore';
 import { db } from './firebase';
-
+import {
+  saveToCloud,
+  saveChengyuToCloud
+} from './firebaseFunctions';
 export const saveToCloud = async (
   user: any,
   newPhrases: any
@@ -35,3 +38,28 @@ export const saveToCloud = async (
     console.error('[Firestore] 保存エラー:', error);
   }
 };
+
+export  const saveChengyuToCloud = async (newChengyuList: Array<{zh: string; py: string; ja: string}>): Promise<void> => {
+    try {
+      const batch = writeBatch(db);
+      
+      // 既存の成語をすべて削除
+      const existingSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
+      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
+      
+      // 新しい成語を登録
+      newChengyuList.forEach((chengyu, idx) => {
+        batch.set(doc(db, 'masterData', 'chengyu', 'list', idx.toString()), {
+          chinese: chengyu.zh,
+          pinyin: chengyu.py,
+          japanese: chengyu.ja,
+          createdAt: new Date()
+        });
+      });
+      
+      await batch.commit();
+      console.log(`[Firestore] ${newChengyuList.length} 件の成語を保存しました`);
+    } catch (error) {
+      console.error('[Firestore] 成語保存エラー:', error);
+    }
+  };
