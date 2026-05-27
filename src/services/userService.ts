@@ -20,7 +20,7 @@ console.error('[Firestore] マスターデータ確認エラー:', error);
 }
 };
 
-  const recordLearningProgress = async (phraseId: string, success: boolean): Promise<void> => {
+  export const recordLearningProgress = async (phraseId: string, success: boolean): Promise<void> => {
     if (!user) return;
     try {
       const phraseRef = doc(db, 'users', user.uid, 'phrases', phraseId);
