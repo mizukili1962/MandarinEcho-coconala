@@ -16,7 +16,6 @@ import {
   FileText, X, RotateCcw
 } from 'lucide-react';
 import './App.css'
-import { initializeMasterData } from './services/userService';
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
 import { initializeMasterData, recordLearningProgress, initializeUserData} from './services/userService';
