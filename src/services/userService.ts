@@ -1,8 +1,4 @@
-import { collection, getDocs,
-  doc,
-  setDoc,
-  query,
-  writeBatch} from 'firebase/firestore';
+import { collection, getDocs, doc,  setDoc,  writeBatch} from 'firebase/firestore';
 import { db } from '../firebase';
 
 export const initializeMasterData = async (): Promise<void> => {
