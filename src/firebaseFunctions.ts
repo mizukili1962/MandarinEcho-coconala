@@ -1,9 +1,10 @@
 import { writeBatch, collection, getDocs, doc } from 'firebase/firestore';
 import { db } from './firebase';
+import type { Phrase, Chengyu } from './types';
 
 export const saveToCloud = async (
   user: any,
-  newPhrases: any
+  newPhrases: Phrase[]
 ): Promise<void> => {
   if (!user) return;
 
@@ -16,7 +17,7 @@ export const saveToCloud = async (
 
     existingSnap.docs.forEach(doc => batch.delete(doc.ref));
 
-    newPhrases.forEach((phrase: any) => {
+    newPhrases.forEach((phrase: Phrase) => {
       batch.set(doc(db, 'users', user.uid, 'phrases', phrase.id), {
         chinese: phrase.zh,
         pinyin: phrase.py,
@@ -36,7 +37,7 @@ export const saveToCloud = async (
   }
 };
 
-export  const saveChengyuToCloud = async (newChengyuList: Array<{zh: string; py: string; ja: string}>): Promise<void> => {
+export  const saveChengyuToCloud = async (newChengyuList: Chengyu[]): Promise<void> => {
     try {
       const batch = writeBatch(db);
       
