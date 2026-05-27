@@ -20,28 +20,6 @@ console.error('[Firestore] マスターデータ確認エラー:', error);
 }
 };
 
-  export const recordLearningProgress = async (phraseId: string, success: boolean): Promise<void> => {
-    if (!user) return;
-    try {
-      const phraseRef = doc(db, 'users', user.uid, 'phrases', phraseId);
-      const phraseSnap = await getDocs(query(collection(db, 'users', user.uid, 'phrases')));
-      const phrase = phraseSnap.docs.find(doc => doc.id === phraseId);
-      
-      if (phrase) {
-        const currentAttempts = phrase.data().attempts || 0;
-        const currentLearned = phrase.data().isLearned || false;
-        
-        await setDoc(phraseRef, {
-          attempts: currentAttempts + 1,
-          isLearned: success ? true : currentLearned,
-          lastAttemptAt: new Date()
-        }, { merge: true });
-      }
-    } catch (error) {
-      console.error('[Firestore] 学習進捗記録エラー:', error);
-    }
-  };
-
 export const initializeUserData = async (uid: string, email: string, displayName: string): Promise<void> => {
     try {
       const userDocRef = doc(db, 'users', uid);
