@@ -23,7 +23,7 @@ import {
 import './App.css'
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
-import { initializeMasterData, recordLearningProgress, initializeUserData} from './services/userService';
+import { initializeMasterData, initializeUserData} from './services/userService';
 import type { Phrase, Chengyu } from './types';
 import { speak } from './utils/speech';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
