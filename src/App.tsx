@@ -21,6 +21,7 @@ import { initializeMasterData } from './services/userService';
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
 import { initializeMasterData, recordLearningProgress, initializeUserData} from './services/userService';
+import type { Phrase, Chengyu } from './types';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -34,8 +35,8 @@ import { fetchChengyuList } from './services/chengyuService';
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [phrases, setPhrases] = useState<Array<{id: string; zh: string; py: string; ja: string}>>([]);
-  const [trainingPhrases, setTrainingPhrases] = useState<Array<{id: string; zh: string; py: string; ja: string}>>([]);
+  const [phrases, setPhrases] = useState<Phrase[]>([])
+  const [trainingPhrases, setTrainingPhrases] = useState<Phrase[]>([])
   const [shuffleQueue, setShuffleQueue] = useState<number[]>([]);
   const [queueIdx, setQueueIdx] = useState(0);
   const [view, setView] = useState('start'); 
@@ -44,7 +45,7 @@ const App = () => {
   const [status, setStatus] = useState("待機中");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [editingPhrase, setEditingPhrase] = useState<{id: string; zh: string; py: string; ja: string} | null>(null);
+  const [editingPhrase, setEditingPhrase] = useState<Phrase | null>(null);
   
   const [importText, setImportText] = useState("");
   const [importMessage, setImportMessage] = useState("");
@@ -64,7 +65,7 @@ const App = () => {
   const [isChengyuModalOpen, setIsChengyuModalOpen] = useState(false);
   const [isChengyuManageModalOpen, setIsChengyuManageModalOpen] = useState(false);
   const [isChengyuImportModalOpen, setIsChengyuImportModalOpen] = useState(false);
-  const [editingChengyu, setEditingChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
+  const [editingChengyu, setEditingChengyu] = useState<Chengyu | null>(null);
   const [chengyuModalMessage, setChengyuModalMessage] = useState("");
   const [chengyuModalSuccess, setChengyuModalSuccess] = useState(false);
   const [chengyuImportText, setChengyuImportText] = useState("");
@@ -77,8 +78,8 @@ const App = () => {
   const chengyuImportFormRef = useRef<HTMLFormElement>(null);
 
 
-  const [randomChengyu, setRandomChengyu] = useState<{zh: string; py: string; ja: string} | null>(null);
-  const [allChengyuList, setAllChengyuList] = useState<Array<{zh: string; py: string; ja: string}>>([]);
+  const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
+  const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
 
 
   useEffect(() => {
