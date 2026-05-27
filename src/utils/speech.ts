@@ -1,7 +1,6 @@
-const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
+export const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
     return new Promise((resolve: (value: void) => void) => {
-      if (isAborted.current) return resolve();
-      
+
       // すべての音声合成をキャンセルし、キューをクリア
       window.speechSynthesis.cancel();
       
@@ -13,7 +12,6 @@ const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
       
       // キャンセル後、キューが完全にクリアされるまで少し待機
       setTimeout(() => {
-        if (isAborted.current) return;
         
         const ut = new SpeechSynthesisUtterance(text);
         ut.lang = lang;
