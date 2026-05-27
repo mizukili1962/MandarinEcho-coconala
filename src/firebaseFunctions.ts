@@ -15,7 +15,9 @@ export const saveToCloud = async (
       collection(db, 'users', user.uid, 'phrases')
     );
 
-    existingSnap.docs.forEach(doc => batch.delete(doc.ref));
+    existingSnap.docs.forEach((snapshotDoc) =>
+  batch.delete(snapshotDoc.ref)
+);
 
     newPhrases.forEach((phrase: Phrase) => {
       batch.set(doc(db, 'users', user.uid, 'phrases', phrase.id), {
@@ -43,7 +45,9 @@ export  const saveChengyuToCloud = async (newChengyuList: Chengyu[]): Promise<vo
       
       // 既存の成語をすべて削除
       const existingSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
-      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
+      existingSnap.docs.forEach((snapshotDoc) =>
+  batch.delete(snapshotDoc.ref)
+);
       
       // 新しい成語を登録
       newChengyuList.forEach((chengyu, idx) => {
