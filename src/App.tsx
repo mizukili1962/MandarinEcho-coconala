@@ -107,33 +107,7 @@ const App = () => {
     loadChengyuList();
   }, []);
 
-  // 成語を保存
-  const saveChengyuToCloud = async (newChengyuList: Array<{zh: string; py: string; ja: string}>): Promise<void> => {
-    try {
-      const batch = writeBatch(db);
-      
-      // 既存の成語をすべて削除
-      const existingSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
-      existingSnap.docs.forEach(doc => batch.delete(doc.ref));
-      
-      // 新しい成語を登録
-      newChengyuList.forEach((chengyu, idx) => {
-        batch.set(doc(db, 'masterData', 'chengyu', 'list', idx.toString()), {
-          chinese: chengyu.zh,
-          pinyin: chengyu.py,
-          japanese: chengyu.ja,
-          createdAt: new Date()
-        });
-      });
-      
-      await batch.commit();
-      console.log(`[Firestore] ${newChengyuList.length} 件の成語を保存しました`);
-    } catch (error) {
-      console.error('[Firestore] 成語保存エラー:', error);
-    }
-  };
-
-
+ 
   useEffect(() => {
     const initAuth = async () => {
       try { await signInAnonymously(auth); } catch (e) {}
