@@ -38,11 +38,7 @@ const App = () => {
   const [importMessage, setImportMessage] = useState("");
   const [importSuccess, setImportSuccess] = useState(false);
   
-  const [importState, setImportState] = useState({
-  text: "",
-  message: "",
-  success: false,
-});
+  
   
   const [modalMessage, setModalMessage] = useState("");
   const [modalSuccess, setModalSuccess] = useState(false);
