@@ -30,10 +30,6 @@ export const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
   console.error(`[音声合成] エラー: ${e.error}`);
   resolve();
 };
-          clearTimeout(timeoutId);
-          console.error(`[音声合成] エラー: ${e.error}`);
-          resolve();
-        };
         
         window.speechSynthesis.speak(ut);
       }, 50);
