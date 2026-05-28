@@ -591,7 +591,7 @@ useEffect(() => {
             const up = editingPhrase ? phrases.map(p => p.id === editingPhrase.id ? newItem : p) : [...phrases, newItem];
             
             setPhrases(up);
-            await saveToCloud(up);
+            await saveToCloud(user, up);
             
             // 1.5秒後にモーダルを閉じる
             setTimeout(() => {
