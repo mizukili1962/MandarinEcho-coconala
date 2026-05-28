@@ -323,7 +323,7 @@ useEffect(() => {
     console.log("練習開始ボタン押下 - phrases:", phrases.length);
     
     // phrasesを使用（Firestoreから自動で取得される）
-    const trainingData = phrases.length > 0 ? phrases : [];
+    const trainingData = phrases;
     
     if (trainingData.length === 0) {
       console.warn("エラー: フレーズが登録されていません");
@@ -365,7 +365,7 @@ useEffect(() => {
       setTimeout(() => {
         console.log("セッション実行開始");
         runSession(q, 0, trainingData);
-      }, 800);
+      const SESSION_START_DELAY = 800;
       
     } catch (err) {
       console.error("エラー発生:", err);
