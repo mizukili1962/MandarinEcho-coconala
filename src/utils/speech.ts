@@ -25,7 +25,11 @@ export const speak = (text: string, lang: string = 'zh-CN'): Promise<void> => {
           resolve();
         };
         
-        ut.onerror = (e) => {
+        ut.onerror = (e: SpeechSynthesisErrorEvent) => {
+  clearTimeout(timeoutId);
+  console.error(`[音声合成] エラー: ${e.error}`);
+  resolve();
+};
           clearTimeout(timeoutId);
           console.error(`[音声合成] エラー: ${e.error}`);
           resolve();
