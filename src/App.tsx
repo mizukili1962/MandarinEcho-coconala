@@ -364,7 +364,7 @@ useEffect(() => {
       console.log("ステップ4: セッション開始予定");
       setTimeout(() => {
         console.log("セッション実行開始");
-        runSession(q, 0, trainingData);
+       void runSession(q, 0, trainingData);
       }, SESSION_START_DELAY);
       
     } catch (err) {
