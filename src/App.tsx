@@ -64,7 +64,12 @@ const App = () => {
   const importFormRef = useRef<HTMLFormElement>(null);
   const chengyuImportFormRef = useRef<HTMLFormElement>(null);
 
-
+const recordLearningProgress = async (
+  phraseId: string,
+  success: boolean
+): Promise<void> => {
+  console.log("学習記録", phraseId, success);
+};
   const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
   const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
 const SESSION_START_DELAY = 800;
@@ -532,7 +537,7 @@ useEffect(() => {
                       </div>
                       <div className="word-actions">
                         <button onClick={() => { setEditingPhrase(p); setIsModalOpen(true); }} className="word-action-btn"><Edit2 size={14}/></button>
-                        <button onClick={() => { const up = phrases.filter(i => i.id !== p.id); setPhrases(up); saveToCloud(up); }} className="word-action-btn"><Trash2 size={14}/></button>
+                        <button onClick={() => { const up = phrases.filter(i => i.id !== p.id); setPhrases(up); saveToCloud(user, up); }} className="word-action-btn"><Trash2 size={14}/></button>
                       </div>
                     </div>
                   ))}
