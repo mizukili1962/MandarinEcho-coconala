@@ -1,25 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  signInAnonymously, 
-  onAuthStateChanged, 
-  signOut, 
-  GoogleAuthProvider,
-  signInWithPopup,
-  type User
-} from 'firebase/auth';
-import {
-  doc,
-  setDoc,
-  onSnapshot,
-  collection,
-  query
-} from 'firebase/firestore';
-import { 
-  Mic, LogOut, ChevronLeft, 
-  Plus, Trash2, Edit2,
-  Volume2,
-  FileText, X, RotateCcw
-} from 'lucide-react';
+import { signInAnonymously, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, type User } from 'firebase/auth';
+import { doc, setDoc, onSnapshot, collection, query } from 'firebase/firestore';
+import {  Mic, LogOut, ChevronLeft,  Plus, Trash2, Edit2, Volume2, FileText, X, RotateCcw } from 'lucide-react';
 import './App.css'
 import { auth, db } from './firebase';
 import { saveToCloud } from './firebaseFunctions';
