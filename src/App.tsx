@@ -67,7 +67,7 @@ const App = () => {
 
   const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
   const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
-
+const SESSION_START_DELAY = 800;
 
   useEffect(() => {
     if (view === 'start' && allChengyuList.length > 0) {
@@ -365,7 +365,7 @@ useEffect(() => {
       setTimeout(() => {
         console.log("セッション実行開始");
         runSession(q, 0, trainingData);
-      const SESSION_START_DELAY = 800;
+      }, SESSION_START_DELAY);
       
     } catch (err) {
       console.error("エラー発生:", err);
