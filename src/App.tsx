@@ -837,7 +837,8 @@ useEffect(() => {
               // その後、登録処理を実行
               const up = [...phrases, ...newItems];
               setPhrases(up);
-              await saveToCloud(up);
+              await saveToCloud(user, up);
+                          
             } else {
               setImportMessage("有効なデータがありません");
               setImportSuccess(false);
