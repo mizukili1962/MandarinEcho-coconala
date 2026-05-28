@@ -792,7 +792,7 @@ useEffect(() => {
               const ja = pts[pts.length - 1];
               const py = pts.length > 2 ? pts.slice(1, -1).join(' ') : '';
               return { id: Math.random().toString(36).substr(2, 9), zh, py, ja };
-            }).filter((i: any): i is {id: string; zh: string; py: string; ja: string} => i !== null);
+            }).filter((i): i is Phrase => i !== null);
             
             // 既存の中国語を集める
             const existingZh = new Set(phrases.map(p => p.zh));
