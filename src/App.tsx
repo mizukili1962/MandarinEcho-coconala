@@ -253,12 +253,6 @@ useEffect(() => {
     });
   };
 
-  const recordLearningProgress = async (
-  phraseId: string,
-  success: boolean
-): Promise<void> => {
-  console.log("学習記録", phraseId, success);
-};
 
   const runSession = async (currentQueue: number[], currentIndex: number, trainingData?: Array<{id: string; zh: string; py: string; ja: string}>, retryCount: number = 0): Promise<void> => {
     // trainingDataが渡されなかった場合は現在のphrasesを使用
