@@ -9,6 +9,7 @@ import { initializeMasterData, initializeUserData} from './services/userService'
 import type { Phrase, Chengyu } from './types';
 import { speak } from './utils/speech';
 import { calculateSimilarity } from './utils/stringUtils';
+import { recordLearningProgress } from './services/learningService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -59,13 +60,6 @@ const App = () => {
   const recognitionRef = useRef<any>(null);
   const importFormRef = useRef<HTMLFormElement>(null);
   const chengyuImportFormRef = useRef<HTMLFormElement>(null);
-
-const recordLearningProgress = async (
-  phraseId: string,
-  success: boolean
-): Promise<void> => {
-  console.log("学習記録", phraseId, success);
-};
   const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
   const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
 const SESSION_START_DELAY = 800;
