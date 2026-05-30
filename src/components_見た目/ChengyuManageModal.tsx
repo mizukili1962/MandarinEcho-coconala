@@ -41,6 +41,20 @@ const [list, setList] = useState<Item[]>(mockList);
         setEditingItem({ ...editingItem, ja: e.target.value })
       }
     />
+    <button
+  onClick={async () => {
+    const updated = list.map((item) =>
+      item.zh === editingItem.zh ? editingItem : item
+    );
+
+    setList(updated);
+    await saveChengyuToCloud(updated);
+
+    setEditingItem(null);
+  }}
+>
+  保存
+</button>
   </div>
 )}
     
