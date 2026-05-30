@@ -1,5 +1,9 @@
 const ChengyuManageModal = () => {
-  return <div>ChengyuManageModal</div>;
+  return (
+    <div>
+      <h2>成語管理</h2>
+    </div>
+  );
 };
 
 export default ChengyuManageModal;
