@@ -343,7 +343,7 @@ useEffect(() => {
                     <OrnatePlum size={32} /> 練習開始
                   </button>
                   <button onClick={() => setIsHandsFree(!isHandsFree)} className="autoplay-btn font-ja">
-                    <OrnateOrchid size={20} /> オートプレイ: {isHandsFree ? 'ON' : 'OFF'}
+                    <OrnateOrchid size={20} /> モード: {isHandsFree ? '音声認識' : '聞き流し'}
                   </button>
                 </div>
               </div>
