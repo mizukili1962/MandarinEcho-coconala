@@ -35,13 +35,13 @@ const [list, setList] = useState<Item[]>(mockList);
             削除
           </button>
 
-          <button
-            onClick={() => {
-              alert("編集：" + item.zh);
-            }}
-          >
-            編集
-          </button>
+         <button
+  onClick={() => {
+    setEditingItem(item);
+  }}
+>
+  編集
+</button>
         </li>
       ))}
     </ul>
