@@ -535,16 +535,8 @@ useEffect(() => {
               return;
             }
             
-            const lines = chengyuImportText.split('\n').filter((l: string) => l.trim());
-            const allItems = lines.map((line: string) => {
-              const pts = line.split(/[,\t\s\u3000]+/).map((s: string) => s.trim()).filter((s: string) => s);
-              if (pts.length < 2) return null;
-              const zh = pts[0];
-              const ja = pts[pts.length - 1];
-              const py = pts.length > 2 ? pts.slice(1, -1).join(' ') : '';
-              return { zh, py, ja };
-            }).filter((i: any): i is {zh: string; py: string; ja: string} => i !== null);
-            
+          const allItems = parseChengyuImportText(chengyuImportText);
+          
             // 既存の中国語を集める
             const existingZh = new Set(allChengyuList.map(c => c.zh));
             
