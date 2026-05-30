@@ -21,30 +21,32 @@ import { fetchChengyuList } from './services/chengyuService';
 
 
 const App = () => {
+  // ===== 認証 =====
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // ===== 単語帳 =====
   const [phrases, setPhrases] = useState<Phrase[]>([])
+  const [editingPhrase, setEditingPhrase] = useState<Phrase | null>(null);
+  // ===== 学習 =====
   const [trainingPhrases, setTrainingPhrases] = useState<Phrase[]>([])
   const [shuffleQueue, setShuffleQueue] = useState<number[]>([]);
   const [queueIdx, setQueueIdx] = useState(0);
+  const [status, setStatus] = useState("待機中");
+  // ===== 成語 =====
+  const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
+  const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
+  // ===== モーダル =====
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const [view, setView] = useState('start'); 
   const [isHandsFree, setIsHandsFree] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState("待機中");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [editingPhrase, setEditingPhrase] = useState<Phrase | null>(null);
-  
   const [importText, setImportText] = useState("");
   const [importMessage, setImportMessage] = useState("");
   const [importSuccess, setImportSuccess] = useState(false);
-  
-  
-  
   const [modalMessage, setModalMessage] = useState("");
   const [modalSuccess, setModalSuccess] = useState(false);
-
-
   const [isManualListening, setIsManualListening] = useState(false);
   const [isChengyuModalOpen, setIsChengyuModalOpen] = useState(false);
   const [isChengyuManageModalOpen, setIsChengyuManageModalOpen] = useState(false);
@@ -55,13 +57,12 @@ const App = () => {
   const [chengyuImportText, setChengyuImportText] = useState("");
   const [chengyuImportMessage, setChengyuImportMessage] = useState("");
   const [chengyuImportSuccess, setChengyuImportSuccess] = useState(false);
-
   const isAborted = useRef(false);
   const recognitionRef = useRef<any>(null);
   const importFormRef = useRef<HTMLFormElement>(null);
   const chengyuImportFormRef = useRef<HTMLFormElement>(null);
-  const [randomChengyu, setRandomChengyu] = useState<Chengyu | null>(null);
-  const [allChengyuList, setAllChengyuList] = useState<Chengyu[]>([]);
+
+
 const SESSION_START_DELAY = 800;
 
   useEffect(() => {
