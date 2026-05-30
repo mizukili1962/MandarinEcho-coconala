@@ -1,9 +1,17 @@
+import React, { useState } from 'react';
+type Item = {
+  zh: string;
+  py: string;
+  ja: string;
+};
+
 const ChengyuManageModal = () => {
-  const mockList = [
-    { zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
-    { zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
-  ];
-const [list, setList] = useState(mockList);
+  const mockList: Item[] = [
+  { zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
+  { zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
+];
+
+const [list, setList] = useState<Item[]>(mockList);
   
   return (
     <div>
