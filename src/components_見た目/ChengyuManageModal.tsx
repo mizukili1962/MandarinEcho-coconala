@@ -13,6 +13,7 @@ const ChengyuManageModal = () => {
 ];
 
 const [list, setList] = useState<Item[]>(mockList);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
   
   return (
   <div>
