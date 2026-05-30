@@ -5,6 +5,7 @@ export type Phrase = {
   ja: string;
 };
 
+
 export type Chengyu = {
   zh: string;
   py: string;
