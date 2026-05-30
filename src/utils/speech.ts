@@ -3,6 +3,7 @@ export const speak = (
   lang: string = 'zh-CN'
 ): Promise<void> => {
   return new Promise((resolve) => {
+    
 
     // すべての音声合成をキャンセル
     window.speechSynthesis.cancel();
