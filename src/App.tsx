@@ -11,7 +11,7 @@ import { speak } from './utils/speech';
 import { recordLearningProgress } from './services/learningService';
 import { listenAndAdvance } from './services/speechRecognitionService';
 import { parsePhraseImportText } from './services/phraseService';
-import { ChengyuManageModal } from './components_見た目/ChengyuManageModal';
+import  ChengyuManageModal  from './components_見た目/ChengyuManageModal';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
