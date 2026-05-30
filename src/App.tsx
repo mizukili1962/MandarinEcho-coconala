@@ -178,6 +178,15 @@ useEffect(() => {
 
     setStatus("お手本...");
     await speak(phrase.zh, 'zh-CN');
+    if (!isHandsFree) {
+  setStatus("聞き流し中...");
+
+  await new Promise(r => setTimeout(r, 1000));
+  await speak(phrase.ja, 'ja-JP');
+  await new Promise(r => setTimeout(r, 800));
+
+  return runSession(currentQueue, currentIndex + 1, trainingData, 0);
+    }
     
     if (isAborted.current) return;
     
