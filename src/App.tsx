@@ -10,6 +10,7 @@ import type { Phrase, Chengyu } from './types';
 import { speak } from './utils/speech';
 import { recordLearningProgress } from './services/learningService';
 import { listenAndAdvance } from './services/speechRecognitionService';
+import { parsePhraseImportText } from './services/phraseService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -666,15 +667,7 @@ useEffect(() => {
               return;
             }
             
-            const lines = importText.split('\n').filter((l: string) => l.trim());
-            const allItems = lines.map((line: string) => {
-              const pts = line.split(/[,\t\s\u3000]+/).map((s: string) => s.trim()).filter((s: string) => s);
-              if (pts.length < 2) return null;
-              const zh = pts[0];
-              const ja = pts[pts.length - 1];
-              const py = pts.length > 2 ? pts.slice(1, -1).join(' ') : '';
-              return { id: Math.random().toString(36).substr(2, 9), zh, py, ja };
-            }).filter((i): i is Phrase => i !== null);
+      const allItems = parsePhraseImportText(importText);
             
             // 既存の中国語を集める
             const existingZh = new Set(phrases.map(p => p.zh));
