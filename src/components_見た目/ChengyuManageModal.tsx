@@ -15,40 +15,38 @@ const ChengyuManageModal = () => {
 const [list, setList] = useState<Item[]>(mockList);
   
   return (
-    <div>
-      <h2>成語管理</h2>
+  <div>
+    <h2>成語管理</h2>
 
-      <ul>
-       <ul>
-  {list.map((item, index) => (
-    <li key={index}>
-      <div>{item.zh}</div>
-      <div>{item.py}</div>
-      <div>{item.ja}</div>
+    <ul>
+      {list.map((item, index) => (
+        <li key={index}>
+          <div>{item.zh}</div>
+          <div>{item.py}</div>
+          <div>{item.ja}</div>
 
-      <button
-        onClick={async () => {
-          const updated = list.filter((_, i) => i !== index);
-          setList(updated);
-          await saveChengyuToCloud(updated);
-        }}
-      >
-        削除
-      </button>
+          <button
+            onClick={async () => {
+              const updated = list.filter((_, i) => i !== index);
+              setList(updated);
+              await saveChengyuToCloud(updated);
+            }}
+          >
+            削除
+          </button>
 
-      {/* 👇ここに移動する */}
-      <button
-        onClick={() => {
-          alert("編集：" + item.zh);
-        }}
-      >
-        編集
-      </button>
-    </li>
-  ))}
-</ul>
-    </div>
-  );
+          <button
+            onClick={() => {
+              alert("編集：" + item.zh);
+            }}
+          >
+            編集
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 };
 
 export default ChengyuManageModal;
