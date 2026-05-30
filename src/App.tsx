@@ -11,6 +11,7 @@ import { speak } from './utils/speech';
 import { recordLearningProgress } from './services/learningService';
 import { listenAndAdvance } from './services/speechRecognitionService';
 import { parsePhraseImportText } from './services/phraseService';
+import { ChengyuManageModal } from './components_見た目/ChengyuManageModal';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -495,35 +496,16 @@ useEffect(() => {
 
 
       {isChengyuManageModalOpen && (
-        <div className="modal-overlay font-ja">
-          <div className="modal-content chengyu-manage-modal-content">
-            <button onClick={() => setIsChengyuManageModalOpen(false)} className="modal-close-btn"><X size={20}/></button>
-            <h3 className="modal-header">成語を管理</h3>
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
-              <button onClick={() => { setEditingChengyu(null); setIsChengyuManageModalOpen(false); setIsChengyuModalOpen(true); }} className="chengyu-add-button font-ja">+ 新規追加</button>
-              <button onClick={() => setIsChengyuImportModalOpen(true)} className="chengyu-add-button-bulk font-ja" style={{ flex: 1 }}>一括登録</button>
-            </div>
-            <div className="chengyu-list">
-              {allChengyuList.map((chengyu, idx) => (
-                <div key={idx} className="chengyu-list-item">
-                  <div className="chengyu-list-item-left">
-                    <div className="chengyu-list-item-zh font-zh">{chengyu.zh}</div>
-                    <div className="chengyu-list-item-py font-zh">{chengyu.py}</div>
-                    <div className="chengyu-list-item-ja font-ja">{chengyu.ja}</div>
-                  </div>
-                  <div className="chengyu-list-item-right">
-                    <button onClick={() => { setEditingChengyu(chengyu); setIsChengyuManageModalOpen(false); setIsChengyuModalOpen(true); }} className="chengyu-button-small edit font-ja">編集</button>
-                    <button onClick={() => { if (confirm('本当に削除しますか？')) { const updated = allChengyuList.filter(c => c.zh !== chengyu.zh); setAllChengyuList(updated); saveChengyuToCloud(updated); if (updated.length === 0) setRandomChengyu(null); } }} className="chengyu-button-small delete font-ja">削除</button>
-                  </div>
-                </div>
-              ))}
-              {allChengyuList.length === 0 && (
-                <div className="chengyu-empty-message font-ja">成語がまだ登録されていません</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+  <ChengyuManageModal
+    allChengyuList={allChengyuList}
+    setAllChengyuList={setAllChengyuList}
+    setRandomChengyu={setRandomChengyu}
+    setIsChengyuManageModalOpen={setIsChengyuManageModalOpen}
+    setIsChengyuModalOpen={setIsChengyuModalOpen}
+    setEditingChengyu={setEditingChengyu}
+    setIsChengyuImportModalOpen={setIsChengyuImportModalOpen}
+  />
+)}
 
       {isChengyuImportModalOpen && (
         <div className="modal-overlay font-ja">
