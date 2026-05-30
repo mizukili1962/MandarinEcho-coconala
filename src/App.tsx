@@ -14,8 +14,7 @@ import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
 import { OrnateChrysanthemum } from './components_見た目/icons_装飾/OrnateChrysanthemum';
-import { fetchChengyuList } from './services/chengyuService';
-
+import { fetchChengyuList, parseChengyuImportText } from './services/chengyuService';
 
 // Firestore から動的に取得するため、ハードコードされたデータは削除
 
