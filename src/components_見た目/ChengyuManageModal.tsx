@@ -1,8 +1,22 @@
 const ChengyuManageModal = () => {
+  const mockList = [
+    { zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
+    { zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
+  ];
+
   return (
     <div>
       <h2>成語管理</h2>
-      <p>ここから機能を少しずつ戻していく</p>
+
+      <ul>
+        {mockList.map((item, i) => (
+          <li key={i}>
+            <div>{item.zh}</div>
+            <div>{item.py}</div>
+            <div>{item.ja}</div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
