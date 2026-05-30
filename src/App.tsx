@@ -385,6 +385,7 @@ useEffect(() => {
   trainingPhrases[shuffleQueue[queueIdx]].zh,
   setIsListening
 );
+                if (recognized) {
                       setStatus("認識されました！");
                       // 学習進捗を記録
                       await recordLearningProgress(trainingPhrases[shuffleQueue[queueIdx]].id, true);
