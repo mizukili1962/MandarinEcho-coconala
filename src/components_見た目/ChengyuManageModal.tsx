@@ -12,14 +12,7 @@ type Props = {
 };
 
 const ChengyuManageModal = ({
-  allChengyuList,
-  setAllChengyuList,
-  setRandomChengyu,
-  setIsChengyuManageModalOpen,
-  setIsChengyuModalOpen,
-  setEditingChengyu,
-  setIsChengyuImportModalOpen,
-}: Props) => {
+  
   return (
     <div>
       ChengyuManageModal
