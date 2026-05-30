@@ -214,7 +214,6 @@ useEffect(() => {
 
 
   const handleStartTrainingFlow = async (): Promise<void> => {
-    console.log("練習開始ボタン押下 - phrases:", phrases.length);
     
     // phrasesを使用（Firestoreから自動で取得される）
     const trainingData = phrases;
@@ -225,14 +224,13 @@ useEffect(() => {
     }
     
     try {
-      console.log("ステップ1: マイク権限確認開始");
+
       // 1. マイク権限の確認
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(t => t.stop());
-      console.log("ステップ1: マイク権限確認完了");
       
       // 2. 音声合成エンジンのウォームアップ（重要: これで最初の読み上げの途切れを防ぐ）
-      console.log("ステップ2: 音声合成ウォームアップ開始");
+     
       window.speechSynthesis.cancel();
       
       // シンプルなウォームアップ（タイムアウト付き）
@@ -242,12 +240,9 @@ useEffect(() => {
       ]);
       window.speechSynthesis.cancel();
       
-      console.log("ステップ2: 音声合成ウォームアップ完了");
-      
       const q = Array.from({length: trainingData.length}, (_, i) => i).sort(() => Math.random() - 0.5);
       isAborted.current = false;
       
-      console.log("ステップ3: UI更新開始");
       // 学習用フレーズを保存（学習中はこのデータを使用）
       setTrainingPhrases(trainingData);
       setShuffleQueue(q);
@@ -255,9 +250,7 @@ useEffect(() => {
       setView('learn');
       
       // 3. UI遷移を待ってからセッション開始
-      console.log("ステップ4: セッション開始予定");
       setTimeout(() => {
-        console.log("セッション実行開始");
        void runSession(q, 0, trainingData);
       }, SESSION_START_DELAY);
       
