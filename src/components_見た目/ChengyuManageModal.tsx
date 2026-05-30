@@ -1,6 +1,7 @@
 import { saveChengyuToCloud } from '../firebaseFunctions';
 import { useState } from 'react';
 type Item = {
+  id: string;
   zh: string;
   py: string;
   ja: string;
@@ -44,8 +45,8 @@ const [list, setList] = useState<Item[]>(mockList);
     <button
   onClick={async () => {
     const updated = list.map((item) =>
-      item.zh === editingItem.zh ? editingItem : item
-    );
+  item.id === editingItem.id ? editingItem : item
+);
 
     setList(updated);
     await saveChengyuToCloud(updated);
