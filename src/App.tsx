@@ -143,111 +143,6 @@ useEffect(() => {
   // 学習進捗を記録
 
 
-  const listenAndAdvance = (targetZh: string): Promise<boolean> => {
-    return new Promise((resolve: (value: boolean) => void) => {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      if (!SpeechRecognition) return resolve(false);
-      
-      const rec = new (SpeechRecognition as any)();
-      recognitionRef.current = rec;
-      rec.lang = 'zh-CN';
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.maxAlternatives = 3;
-      
-      let timeoutId: any = null;
-      const MAX_LISTEN_TIME = 7000; // 7秒のタイムアウト
-      const IGNORE_FIRST_RESULTS_MS = 1000; // 最初の1秒の結果を無視（お手本完全終了を確保）
-      let recognitionStartTime = 0;
-      let hasReceivedValidResult = false; // 有効な結果を受け取ったかどうか
-      let hasResolved = false; // 既に結果を返したかどうかのフラグ
-      
-      const resolveOnce = (result: boolean) => {
-        if (hasResolved) return;
-        hasResolved = true;
-        clearTimeout(timeoutId);
-        setIsListening(false);
-        resolve(result);
-      };
-      
-      // 認識開始時にタイムアウトを設定
-      rec.onstart = (): void => {
-        recognitionStartTime = Date.now();
-        setIsListening(true);
-        timeoutId = setTimeout(() => {
-          resolveOnce(false);
-          rec.stop();
-        }, MAX_LISTEN_TIME);
-      };
-      
-      rec.onresult = (e: any): void => {
-        if (hasResolved) return; // 既に結果を返していたら処理しない
-        
-        let interimTranscript = '';
-        let finalTranscript = '';
-        
-        // 最初の2秒の結果を無視
-        const elapsedTime = Date.now() - recognitionStartTime;
-        if (elapsedTime < IGNORE_FIRST_RESULTS_MS) {
-          console.log(`[音声認識] 無視中: ${elapsedTime}ms - 最初の${IGNORE_FIRST_RESULTS_MS}msは無視します`);
-          return;
-        }
-        
-        hasReceivedValidResult = true;
-        
-        // すべての結果を処理
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const transcript = e.results[i][0].transcript.trim();
-          
-          if (e.results[i].isFinal) {
-            // 最終結果を使用
-            finalTranscript += transcript + ' ';
-          } else {
-            // 中間結果
-            interimTranscript += transcript;
-          }
-        }
-        
-        // 最終結果をチェック
-        if (finalTranscript) {
-          const results = finalTranscript.trim().split(/\s+/);
-          for (const result of results) {
-            console.log(`[音声認識] 認識結果: "${result}" 対象: "${targetZh}"`);
-            
-            // 空文字を除外して、完全一致、または部分一致をチェック
-            if (result && (result === targetZh || result.includes(targetZh) || targetZh.includes(result))) {
-              console.log(`[音声認識] 完全一致: "${result}"`);
-              resolveOnce(true);
-              rec.stop();
-              return;
-            }
-            
-            // 類似度チェック（編集距離を使用した簡易実装）
-            const similarity = calculateSimilarity(result, targetZh);
-            if (similarity > 0.65) {
-              console.log(`[音声認識] 類似度一致: "${result}" (${(similarity * 100).toFixed(1)}%)`);
-              resolveOnce(true);
-              rec.stop();
-              return;
-            }
-          }
-        }
-      };
-      
-      rec.onerror = (e: any): void => {
-        console.error('[音声認識] エラー:', e.error);
-        resolveOnce(false);
-      };
-      
-      rec.onend = (): void => {
-        console.log(`[音声認識] 終了 (有効な結果受取: ${hasReceivedValidResult})`);
-        resolveOnce(false);
-      };
-      
-      rec.start();
-    });
-  };
-
 
   const runSession = async (currentQueue: number[], currentIndex: number, trainingData?: Array<{id: string; zh: string; py: string; ja: string}>, retryCount: number = 0): Promise<void> => {
     // trainingDataが渡されなかった場合は現在のphrasesを使用
@@ -486,8 +381,10 @@ useEffect(() => {
                     setStatus("聞き取り中...");
                     
                     // 手動で聞き取りを再開
-                    const recognized = await listenAndAdvance(trainingPhrases[shuffleQueue[queueIdx]].zh);
-                    if (recognized) {
+                    const recognized = await listenAndAdvance(
+  trainingPhrases[shuffleQueue[queueIdx]].zh,
+  setIsListening
+);
                       setStatus("認識されました！");
                       // 学習進捗を記録
                       await recordLearningProgress(trainingPhrases[shuffleQueue[queueIdx]].id, true);
