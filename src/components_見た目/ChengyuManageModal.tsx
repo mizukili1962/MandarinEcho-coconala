@@ -18,7 +18,7 @@ const [list, setList] = useState<Item[]>(mockList);
       <h2>成語管理</h2>
 
       <ul>
-        {list.map((item, i) => (
+        {list.map((item, index) => (
   <li key={i}>
     <div>{item.zh}</div>
     <div>{item.py}</div>
