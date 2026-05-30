@@ -8,7 +8,6 @@ import { saveToCloud, saveChengyuToCloud} from './firebaseFunctions';
 import { initializeMasterData, initializeUserData} from './services/userService';
 import type { Phrase, Chengyu } from './types';
 import { speak } from './utils/speech';
-import { calculateSimilarity } from './utils/stringUtils';
 import { recordLearningProgress } from './services/learningService';
 import { listenAndAdvance } from './services/speechRecognitionService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
