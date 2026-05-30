@@ -18,6 +18,11 @@ const [list, setList] = useState<Item[]>(mockList);
   return (
   <div>
     <h2>成語管理</h2>
+    {editingItem && (
+  <div>
+    編集中: {editingItem.zh}
+  </div>
+)}
 
     <ul>
       {list.map((item, index) => (
