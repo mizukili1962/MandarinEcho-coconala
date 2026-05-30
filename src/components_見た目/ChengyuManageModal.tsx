@@ -19,15 +19,17 @@ const [list, setList] = useState<Item[]>(mockList);
 
       <ul>
         {list.map((item, index) => (
-  <li key={i}>
+  <li key={index}>
     <div>{item.zh}</div>
     <div>{item.py}</div>
     <div>{item.ja}</div>
 
     <button
-      onClick={() => {
-        const updated = list.filter((_, index) => index !== i);
+      onClick={async () => {
+        const updated = list.filter((_, i) => i !== index);
         setList(updated);
+
+        await saveChengyuToCloud(updated);
       }}
     >
       削除
