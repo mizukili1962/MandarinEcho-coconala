@@ -37,6 +37,13 @@ const [list, setList] = useState<Item[]>(mockList);
     </button>
   </li>
 ))}
+        <button
+  onClick={() => {
+    alert("編集：" + item.zh);
+  }}
+>
+  編集
+</button>
       </ul>
     </div>
   );
