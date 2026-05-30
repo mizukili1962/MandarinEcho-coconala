@@ -10,6 +10,7 @@ import type { Phrase, Chengyu } from './types';
 import { speak } from './utils/speech';
 import { calculateSimilarity } from './utils/stringUtils';
 import { recordLearningProgress } from './services/learningService';
+import { listenAndAdvance } from './services/speechRecognitionService';
 import { OrnatePlum } from './components_見た目/icons_装飾/OrnatePlum';
 import { OrnateOrchid } from './components_見た目/icons_装飾/OrnateOrchid';
 import { OrnateBamboo } from './components_見た目/icons_装飾/OrnateBamboo';
@@ -290,7 +291,10 @@ useEffect(() => {
     if (isAborted.current) return;
     
     setStatus("聞き取り中...");
-    const success = await listenAndAdvance(phrase.zh);
+    const success = await listenAndAdvance(
+  phrase.zh,
+  setIsListening
+);
     
     if (isAborted.current) return;
     
