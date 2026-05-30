@@ -18,12 +18,14 @@
 body {
   margin: 0;
   box-sizing: border-box;
+  background-color: hotpink;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
 }
+
 
 /* ========================================
    テキスト表示設定
