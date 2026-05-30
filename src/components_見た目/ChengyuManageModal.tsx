@@ -14,6 +14,14 @@ const ChengyuManageModal = () => {
             <div>{item.zh}</div>
             <div>{item.py}</div>
             <div>{item.ja}</div>
+
+            <button
+  onClick={() => {
+    alert("削除テスト：" + item.zh);
+  }}
+>
+  削除
+</button>
           </li>
         ))}
       </ul>
