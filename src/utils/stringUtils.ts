@@ -3,6 +3,7 @@
     const len1 = str1.length;
     const len2 = str2.length;
     const matrix: number[][] = [];
+  
     
     for (let i = 0; i <= len2; i++) {
       matrix[i] = [i];
