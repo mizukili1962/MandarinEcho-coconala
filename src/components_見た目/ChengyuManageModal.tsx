@@ -17,6 +17,33 @@ const [list, setList] = useState<Item[]>(mockList);
   
   return (
   <div>
+{editingItem && (
+  <div>
+    <h3>編集モード</h3>
+
+    <input
+      value={editingItem.zh}
+      onChange={(e) =>
+        setEditingItem({ ...editingItem, zh: e.target.value })
+      }
+    />
+
+    <input
+      value={editingItem.py}
+      onChange={(e) =>
+        setEditingItem({ ...editingItem, py: e.target.value })
+      }
+    />
+
+    <input
+      value={editingItem.ja}
+      onChange={(e) =>
+        setEditingItem({ ...editingItem, ja: e.target.value })
+      }
+    />
+  </div>
+)}
+    
     <h2>成語管理</h2>
     {editingItem && (
   <div>
