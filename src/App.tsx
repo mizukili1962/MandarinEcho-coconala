@@ -505,15 +505,7 @@ useEffect(() => {
 
 
       {isChengyuManageModalOpen && (
-  <ChengyuManageModal
-    allChengyuList={allChengyuList}
-    setAllChengyuList={setAllChengyuList}
-    setRandomChengyu={setRandomChengyu}
-    setIsChengyuManageModalOpen={setIsChengyuManageModalOpen}
-    setIsChengyuModalOpen={setIsChengyuModalOpen}
-    setEditingChengyu={setEditingChengyu}
-    setIsChengyuImportModalOpen={setIsChengyuImportModalOpen}
-  />
+  <ChengyuManageModal />
 )}
 
       {isChengyuImportModalOpen && (
