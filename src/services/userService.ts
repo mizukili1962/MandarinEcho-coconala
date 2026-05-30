@@ -1,6 +1,7 @@
 import { collection, getDocs, doc,  setDoc,  writeBatch} from 'firebase/firestore';
 import { db } from '../firebase';
 
+
 export const initializeMasterData = async (): Promise<void> => {
 try {
 const chengyuSnap = await getDocs(collection(db, 'masterData', 'chengyu', 'list'));
