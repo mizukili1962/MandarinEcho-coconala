@@ -71,7 +71,7 @@ input::placeholder {
 
 .app-container.normal {
   /* 通常モード: 深い青灰色背景 */
-  background-color: rgb(15 23 42 / var(--tw-bg-opacity, 1));
+  background-color: #3F9877;
   color: white;
 }
 
