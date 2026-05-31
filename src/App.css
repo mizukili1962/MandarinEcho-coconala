@@ -417,7 +417,7 @@ input::placeholder {
   .autoplay-btn {
     padding: 0.75rem;
     border-radius: 1rem;
-    font-size: 1rem;
+    font-size: 1.2rem;
     gap: 0.25rem;
   }
 }
@@ -934,7 +934,7 @@ input::placeholder {
   .nav-btn {
     padding: 0.625rem;
     border-radius: 1rem;
-    font-size: 0.5rem;
+    font-size: 0.7rem;
     gap: 0.25rem;
   }
 }
