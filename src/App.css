@@ -22,6 +22,8 @@ body {
   margin: 0;
   box-sizing: border-box;
   background-color: #3F9877;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
 }
 
 * {
