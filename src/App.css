@@ -1,6 +1,6 @@
-/* Mandarin Echo Identity Style Sheet */
+r/* Mandarin Echo Identity Style Sheet */
 
-:root {
+:root {⅘
   --primary-color: #3F9877;
   --secondary-color: #2D7A5E;
   --handsfree-mode-color: #900C0C;
@@ -504,7 +504,7 @@ input::placeholder {
 
 @media (max-width: 640px) {
   .phrase-zh {
-    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-size: clamp(1.7rem, 6vw, 2rem);
     margin-bottom: 0.5rem;
   }
 }
@@ -522,7 +522,7 @@ input::placeholder {
 
 @media (max-width: 640px) {
   .phrase-py {
-    font-size: clamp(0.65rem, 2.5vw, 0.875rem);
+    font-size: clamp(0.85rem, 2.5vw, 0.875rem);
     margin-bottom: 0.25rem;
   }
 }
@@ -535,7 +535,7 @@ input::placeholder {
 
 @media (max-width: 640px) {
   .phrase-ja {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 }
 
