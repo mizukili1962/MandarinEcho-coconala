@@ -934,7 +934,7 @@ input::placeholder {
   .nav-btn {
     padding: 0.625rem;
     border-radius: 1rem;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     gap: 0.25rem;
   }
 }
