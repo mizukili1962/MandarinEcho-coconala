@@ -346,7 +346,7 @@ input::placeholder {
   padding: 1.5rem;
   border-radius: 1.875rem;
   font-weight: 700;
-  font-size: clamp(1.6rem, 7vw, 3rem);
+  font-size: clamp(1.4rem, 6vw, 2.8rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,7 +360,6 @@ input::placeholder {
   .start-training-btn {
     padding: 1rem 0.75rem;
     border-radius: 1rem;
-    font-size: 1rem;
     gap: 0.5rem;
   }
 }
