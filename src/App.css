@@ -276,7 +276,7 @@ input::placeholder {
 
 @media (max-width: 640px) {
   .chengyu-pinyin {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -288,7 +288,7 @@ input::placeholder {
 
 @media (max-width: 640px) {
   .chengyu-meaning {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
   }
 }
 
