@@ -346,7 +346,7 @@ input::placeholder {
   padding: 1.5rem;
   border-radius: 1.875rem;
   font-weight: 700;
-  font-size: clamp(1rem, 5vw, 2rem);
+  font-size: clamp(1.3rem, 7vw, 3rem);
   display: flex;
   align-items: center;
   justify-content: center;
