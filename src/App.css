@@ -7,12 +7,11 @@
   --handsfree-header-color: #700000;
   --accent-gold: #FFD700;
    /* 日本語フォント（学習向け・現実解） */
-  --ja-font: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --ja-font: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
 
   /* 中国語フォント */
-  --zh-font: "Noto Serif SC", "STKaiti", "华文楷体", serif;
+ --zh-font: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
 }
-
 /* ========================================
    グローバルスタイル
    ======================================== */
