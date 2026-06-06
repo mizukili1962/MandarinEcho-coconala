@@ -61,13 +61,23 @@ const list = allChengyuList;
 )}
     
     <h2>成語管理</h2>
-    {editingItem && (
+
+<button
+  onClick={() => {
+    setEditingChengyu(null);
+    setIsChengyuModalOpen(true);
+  }}
+>
+  ＋ 成語を追加
+</button>
+
+{editingItem && (
   <div>
     編集中: {editingItem.zh}
   </div>
 )}
 
-    <ul>
+<ul>
      {list.map((item: Item, index: number) => (
         <li key={index}>
           <div>{item.zh}</div>
