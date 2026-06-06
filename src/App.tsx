@@ -77,22 +77,38 @@ console.log(randomChengyu);
 
   // Firestore から成語リストを取得
   useEffect(() => {
-    const loadChengyuList = async () => {
-      try {
+  const loadChengyuList = async () => {
+    try {
 
+      const list = await fetchChengyuList();
 
-        const list = await fetchChengyuList();
-       
+      if (list.length === 0) {
+        setAllChengyuList([
+          {
+            id: "1",
+            zh: "半途而废",
+            py: "bàn tú ér fèi",
+            ja: "物事を途中で投げ出すこと"
+          }
+        ]);
+        setRandomChengyu({
+          id: "1",
+          zh: "半途而废",
+          py: "bàn tú ér fèi",
+          ja: "物事を途中で投げ出すこと"
+        });
+      } else {
         setAllChengyuList(list);
-        if (list.length > 0) {
-          setRandomChengyu(list[0]);
-        }
-      } catch (error) {
-        console.error('[Firestore] 成語リスト取得エラー:', error);
+        setRandomChengyu(list[0]);
       }
-    };
-    loadChengyuList();
-  }, []);
+
+    } catch (error) {
+      console.error('[Firestore] 成語リスト取得エラー:', error);
+    }
+  };
+
+  loadChengyuList();
+}, []);
 
  
   useEffect(() => {
