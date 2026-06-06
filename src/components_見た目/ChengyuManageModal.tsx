@@ -1,7 +1,6 @@
 import { saveChengyuToCloud } from '../firebaseFunctions';
 import { useState } from 'react';
 type Item = {
-  id: string;
   zh: string;
   py: string;
   ja: string;
@@ -51,7 +50,7 @@ const list = allChengyuList;
     <button
   onClick={async () => {
     const updated = list.map((item: Item) =>
-  item.id === editingItem.id ? editingItem : item
+  item.zh === editingItem.zh ? editingItem : item
 );
 
     setAllChengyuList(updated);
