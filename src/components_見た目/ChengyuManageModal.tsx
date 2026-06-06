@@ -17,6 +17,11 @@ const ChengyuManageModal = ({
   setIsChengyuImportModalOpen,
 }: any) => {
 
+  const mockList: Item[] = [
+  { id: "1", zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
+  { id: "2", zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
+];
+
 const [list, setList] = useState<Item[]>(mockList);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   
