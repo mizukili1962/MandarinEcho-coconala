@@ -17,10 +17,7 @@ const ChengyuManageModal = ({
   setIsChengyuImportModalOpen,
 }: any) => {
 
-  const mockList: Item[] = [
-  { id: "1", zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
-  { id: "2", zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
-];
+  
 
 const list = allChengyuList;
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -76,7 +73,7 @@ const list = allChengyuList;
 )}
 
     <ul>
-      {list.map((item, index) => (
+     {list.map((item: Item, index: number) => (
         <li key={index}>
           <div>{item.zh}</div>
           <div>{item.py}</div>
@@ -84,7 +81,7 @@ const list = allChengyuList;
 
           <button
             onClick={async () => {
-              const updated = list.filter((_, i) => i !== index);
+              const updated = list.filter((_: Item, i: number) => i !== index);
               setAllChengyuList(updated);
               await saveChengyuToCloud(updated);
             }}
