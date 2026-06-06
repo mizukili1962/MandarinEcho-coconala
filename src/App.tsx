@@ -85,14 +85,12 @@ console.log(randomChengyu);
       if (list.length === 0) {
         setAllChengyuList([
           {
-            id: "1",
             zh: "半途而废",
             py: "bàn tú ér fèi",
             ja: "物事を途中で投げ出すこと"
           }
         ]);
         setRandomChengyu({
-          id: "1",
           zh: "半途而废",
           py: "bàn tú ér fèi",
           ja: "物事を途中で投げ出すこと"
