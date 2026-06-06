@@ -388,6 +388,10 @@ input::placeholder {
   flex-direction: column;
   gap: 1rem;
 }
+.start-training-btn svg {
+  width: 1.6em;
+  height: 1.6em;
+}
 
 @media (max-width: 640px) {
   .start-button-group {
