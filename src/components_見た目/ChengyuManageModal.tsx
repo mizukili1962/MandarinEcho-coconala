@@ -22,7 +22,7 @@ const ChengyuManageModal = ({
   { id: "2", zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
 ];
 
-const [list, setList] = useState<Item[]>(mockList);
+const list = allChengyuList;
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   
   return (
@@ -57,7 +57,7 @@ const [list, setList] = useState<Item[]>(mockList);
   item.id === editingItem.id ? editingItem : item
 );
 
-    setList(updated);
+    setAllChengyuList(updated);
     await saveChengyuToCloud(updated);
 
     setEditingItem(null);
@@ -85,7 +85,7 @@ const [list, setList] = useState<Item[]>(mockList);
           <button
             onClick={async () => {
               const updated = list.filter((_, i) => i !== index);
-              setList(updated);
+              setAllChengyuList(updated);
               await saveChengyuToCloud(updated);
             }}
           >
