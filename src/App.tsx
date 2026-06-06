@@ -505,15 +505,27 @@ useEffect(() => {
 
 
 {isChengyuManageModalOpen && (
-  <ChengyuManageModal
-    allChengyuList={allChengyuList}
-    setAllChengyuList={setAllChengyuList}
-    setRandomChengyu={setRandomChengyu}
-    setIsChengyuManageModalOpen={setIsChengyuManageModalOpen}
-    setIsChengyuModalOpen={setIsChengyuModalOpen}
-    setEditingChengyu={setEditingChengyu}
-    setIsChengyuImportModalOpen={setIsChengyuImportModalOpen}
-  />
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <ChengyuManageModal
+        allChengyuList={allChengyuList}
+        setAllChengyuList={setAllChengyuList}
+        setRandomChengyu={setRandomChengyu}
+        setIsChengyuManageModalOpen={setIsChengyuManageModalOpen}
+        setIsChengyuModalOpen={setIsChengyuModalOpen}
+        setEditingChengyu={setEditingChengyu}
+        setIsChengyuImportModalOpen={setIsChengyuImportModalOpen}
+      />
+
+      <button
+        type="button"
+        onClick={() => setIsChengyuManageModalOpen(false)}
+        className="modal-cancel-btn"
+      >
+        閉じる
+      </button>
+    </div>
+  </div>
 )}
 
       {isChengyuImportModalOpen && (
