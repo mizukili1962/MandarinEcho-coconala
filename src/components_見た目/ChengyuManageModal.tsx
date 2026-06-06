@@ -50,7 +50,7 @@ const list = allChengyuList;
     />
     <button
   onClick={async () => {
-    const updated = list.map((item) =>
+    const updated = list.map((item: Item) =>
   item.id === editingItem.id ? editingItem : item
 );
 
