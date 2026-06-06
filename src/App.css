@@ -429,9 +429,9 @@ input::placeholder {
 .autoplay-btn svg,
 .autoplay-btn img,
 .autoplay-btn i {
-  width: 1.6em;
-  height: 1.6em;
-  font-size: 1.6em;
+  width: 1.4em;
+  height: 1.4em;
+  font-size: 1.4em;
 }
 .autoplay-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
