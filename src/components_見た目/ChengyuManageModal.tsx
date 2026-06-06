@@ -7,11 +7,15 @@ type Item = {
   ja: string;
 };
 
-const ChengyuManageModal = () => {
-  const mockList: Item[] = [
-  { id: "1", zh: "一石二鳥", py: "yī shí èr niǎo", ja: "一つで二つの利益" },
-  { id: "2", zh: "画蛇添足", py: "huà shé tiān zú", ja: "余計なことをする" },
-];
+const ChengyuManageModal = ({
+  allChengyuList,
+  setAllChengyuList,
+  setRandomChengyu,
+  setIsChengyuManageModalOpen,
+  setIsChengyuModalOpen,
+  setEditingChengyu,
+  setIsChengyuImportModalOpen,
+}: any) => {
 
 const [list, setList] = useState<Item[]>(mockList);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
