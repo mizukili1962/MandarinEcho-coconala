@@ -72,6 +72,8 @@ const SESSION_START_DELAY = 800;
       setRandomChengyu(allChengyuList[idx]);
     }
   }, [view, allChengyuList]);
+  console.log(allChengyuList);
+console.log(randomChengyu);
 
   // Firestore から成語リストを取得
   useEffect(() => {
