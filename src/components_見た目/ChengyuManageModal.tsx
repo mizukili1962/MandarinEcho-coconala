@@ -9,13 +9,9 @@ type Item = {
 const ChengyuManageModal = ({
   allChengyuList,
   setAllChengyuList,
-  setRandomChengyu,
-  setIsChengyuManageModalOpen,
   setIsChengyuModalOpen,
   setEditingChengyu,
-  setIsChengyuImportModalOpen,
 }: any) => {
-
   
 
 const list = allChengyuList;
